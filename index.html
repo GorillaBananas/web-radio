@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0a0a0a">
@@ -14,58 +14,70 @@
 </head>
 <body>
 
-  <!-- Top: Selectors -->
-  <div class="selectors">
+<div class="app">
+
+  <!-- ── Selectors ── -->
+  <div class="pick">
+
     <div class="brand">Newstalk<span>ZB</span></div>
 
-    <div class="sel-row">
-      <div class="seg-control" id="regionControl"></div>
+    <div class="pick-group">
+      <label class="pick-label">Region</label>
+      <div class="seg" id="regionSeg"></div>
     </div>
 
-    <div class="sel-row">
-      <div class="seg-control seg-days" id="dayControl"></div>
+    <div class="pick-row">
+      <div class="pick-group pick-grow">
+        <label class="pick-label">Day</label>
+        <select class="sel" id="daySel"></select>
+      </div>
+      <div class="pick-group pick-grow">
+        <label class="pick-label">Time</label>
+        <select class="sel" id="timeSel">
+          <option value="" disabled selected>--:--</option>
+        </select>
+      </div>
     </div>
 
-    <div class="sel-row">
-      <select class="time-select" id="timeSelect">
-        <option value="" disabled selected>Select time</option>
-      </select>
-    </div>
   </div>
 
-  <!-- Bottom: Player -->
+  <!-- ── Player ── -->
   <div class="player">
-    <div class="player-now">
-      <div class="player-title" id="playerTitle">Choose a time to start</div>
-      <div class="player-subtitle" id="playerSubtitle">15 minute blocks</div>
+
+    <div class="now">
+      <div class="now-title" id="nowTitle">Select a time to begin</div>
+      <div class="now-sub" id="nowSub">15-minute blocks</div>
     </div>
 
-    <div class="player-controls">
-      <button class="ctrl-btn ctrl-skip" id="btnPrev" aria-label="Previous">
+    <div class="controls">
+      <button class="btn-skip" id="btnPrev" aria-label="Previous">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
       </button>
-      <button class="ctrl-btn ctrl-play" id="btnPlay" aria-label="Play">
+      <button class="btn-play" id="btnPlay" aria-label="Play">
         <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         <div class="spinner"></div>
       </button>
-      <button class="ctrl-btn ctrl-skip" id="btnNext" aria-label="Next">
+      <button class="btn-skip" id="btnNext" aria-label="Next">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
       </button>
     </div>
 
-    <div class="progress-area">
-      <span class="progress-time" id="timeCurrent">0:00</span>
-      <div class="progress-wrap" id="progressWrap">
-        <div class="progress-track">
-          <div class="progress-fill" id="progressFill"></div>
+    <div class="prog">
+      <span class="prog-t" id="timeCur">0:00</span>
+      <div class="prog-bar" id="progBar">
+        <div class="prog-track">
+          <div class="prog-fill" id="progFill"></div>
         </div>
       </div>
-      <span class="progress-time" id="timeTotal">0:00</span>
+      <span class="prog-t" id="timeTot">0:00</span>
     </div>
+
   </div>
 
-  <div class="toast" id="toast"></div>
-  <audio id="audio" preload="none"></audio>
-  <script src="app.js"></script>
+</div>
+
+<div class="toast" id="toast"></div>
+<audio id="audio" preload="none"></audio>
+<script src="app.js"></script>
 </body>
 </html>

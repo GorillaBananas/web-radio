@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0a0a0a"/>
+  <text x="256" y="220" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="140" font-weight="700" fill="#ffffff">ZB</text>
+  <text x="256" y="340" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="60" font-weight="500" fill="#e63946">ON DEMAND</text>
+  <rect x="120" y="370" width="272" height="4" rx="2" fill="#e63946" opacity="0.3"/>
+</svg>

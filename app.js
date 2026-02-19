@@ -5,14 +5,7 @@ const BLOCKS_PER_HOUR = 60 / BLOCK_MINUTES;
 const TOTAL_BLOCKS = 24 * BLOCKS_PER_HOUR;
 const NZDT_OFFSET = 13; // NZDT = UTC+13
 
-const TIME_GROUPS = [
-  { label: 'Early Morning', start: 0, end: 6 },
-  { label: 'Morning', start: 6, end: 12 },
-  { label: 'Afternoon', start: 12, end: 18 },
-  { label: 'Evening', start: 18, end: 24 },
-];
-
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAY_NAMES_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -25,11 +18,9 @@ const state = {
   loading: false,
 };
 
-// ── DOM Helpers ──
+// ── DOM ──
 const $ = (id) => document.getElementById(id);
 const audio = $('audio');
-const playerBar = $('playerBar');
-const progressFill = $('progressFill');
 const btnPlay = $('btnPlay');
 
 // ── Date/Time Helpers ──
@@ -40,10 +31,10 @@ function getNZNow() {
 }
 
 function getNZDate(daysAgo) {
-  const nzNow = getNZNow();
-  nzNow.setDate(nzNow.getDate() - daysAgo);
-  nzNow.setHours(0, 0, 0, 0);
-  return nzNow;
+  const d = getNZNow();
+  d.setDate(d.getDate() - daysAgo);
+  d.setHours(0, 0, 0, 0);
+  return d;
 }
 
 function formatDateDot(date) {
@@ -70,34 +61,32 @@ function blockToUrlTime(block) {
   return `${String(h).padStart(2, '0')}.${String(m).padStart(2, '0')}.00`;
 }
 
-function isFutureBlock(dayOffset, block) {
-  if (dayOffset > 0) return false;
-  const nzNow = getNZNow();
-  const nowBlock = nzNow.getHours() * BLOCKS_PER_HOUR +
-                   Math.floor(nzNow.getMinutes() / BLOCK_MINUTES);
-  return block > nowBlock;
+function blockTo12h(block) {
+  const { h, m } = blockToHM(block);
+  const ampm = h < 12 ? 'am' : 'pm';
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+}
+
+function maxBlockToday() {
+  const nz = getNZNow();
+  return nz.getHours() * BLOCKS_PER_HOUR + Math.floor(nz.getMinutes() / BLOCK_MINUTES);
 }
 
 function regionLabel(r) {
   return r.charAt(0).toUpperCase() + r.slice(1);
 }
 
-function formatSecs(seconds) {
-  if (!isFinite(seconds) || seconds < 0) return '0:00';
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${String(s).padStart(2, '0')}`;
+function formatSecs(s) {
+  if (!isFinite(s) || s < 0) return '0:00';
+  return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
 }
 
-// ── URL Builder ──
-
 function buildUrl(region, date, block) {
-  const base = 'https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB';
-  return `${base}/${region}/${formatDateDot(date)}-${blockToUrlTime(block)}-D.mp3`;
+  return `https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/${region}/${formatDateDot(date)}-${blockToUrlTime(block)}-D.mp3`;
 }
 
 // ── Toast ──
-
 let toastTimer;
 function showToast(msg) {
   const el = $('toast');
@@ -107,92 +96,83 @@ function showToast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('visible'), 2500);
 }
 
-// ── Render: Regions ──
+// ══════════════════════════════════
+// Render: Regions (segmented control)
+// ══════════════════════════════════
 
 function renderRegions() {
-  const wrap = $('regionPills');
-  wrap.innerHTML = REGIONS.map((r) => {
-    const cls = r === state.region ? 'region-pill active' : 'region-pill';
-    return `<div class="${cls}" data-region="${r}">${regionLabel(r)}</div>`;
-  }).join('');
+  $('regionControl').innerHTML = REGIONS.map((r) =>
+    `<button class="seg-btn${r === state.region ? ' active' : ''}" data-region="${r}">${regionLabel(r)}</button>`
+  ).join('');
 }
 
-$('regionPills').addEventListener('click', (e) => {
-  const pill = e.target.closest('.region-pill');
-  if (!pill) return;
-  state.region = pill.dataset.region;
+$('regionControl').addEventListener('click', (e) => {
+  const btn = e.target.closest('.seg-btn');
+  if (!btn) return;
+  state.region = btn.dataset.region;
   localStorage.setItem('zb_region', state.region);
   renderRegions();
-  renderTimeGrid();
+  updatePlayerText();
   if (state.playing || state.loading) playCurrentBlock();
 });
 
-// ── Render: Days ──
+// ══════════════════════════════════
+// Render: Days (segmented control)
+// ══════════════════════════════════
 
 function renderDays() {
-  const wrap = $('dayScroll');
   let html = '';
   for (let i = 0; i < 7; i++) {
-    const date = getNZDate(i);
-    const name = i === 0 ? 'Today' : i === 1 ? 'Yest.' : DAY_NAMES[date.getDay()];
-    const active = i === state.dayOffset;
-    const today = i === 0 && !active;
-    html += `<div class="day-card${active ? ' active' : ''}${today ? ' today' : ''}" data-offset="${i}">
-      <div class="day-name">${name}</div>
-      <div class="day-date">${date.getDate()}</div>
-      <div class="day-month">${MONTH_NAMES[date.getMonth()]}</div>
-    </div>`;
+    const d = getNZDate(i);
+    const label = i === 0 ? 'Today' : i === 1 ? 'Yest' : DAY_NAMES_SHORT[d.getDay()];
+    html += `<button class="seg-btn${i === state.dayOffset ? ' active' : ''}" data-offset="${i}">
+      ${label}<span class="day-num">${d.getDate()}</span>
+    </button>`;
   }
-  wrap.innerHTML = html;
+  $('dayControl').innerHTML = html;
 }
 
-$('dayScroll').addEventListener('click', (e) => {
-  const card = e.target.closest('.day-card');
-  if (!card) return;
-  state.dayOffset = parseInt(card.dataset.offset, 10);
+$('dayControl').addEventListener('click', (e) => {
+  const btn = e.target.closest('.seg-btn');
+  if (!btn) return;
+  state.dayOffset = parseInt(btn.dataset.offset, 10);
   renderDays();
-  renderTimeGrid();
+  renderTimeOptions();
+  updatePlayerText();
 });
 
-// ── Render: Time Grid ──
+// ══════════════════════════════════
+// Render: Time (native <select>)
+// ══════════════════════════════════
 
-function renderTimeGrid() {
-  const container = $('timeGrid');
-  let html = '';
+function renderTimeOptions() {
+  const sel = $('timeSelect');
+  const limit = state.dayOffset === 0 ? maxBlockToday() : TOTAL_BLOCKS - 1;
 
-  for (const group of TIME_GROUPS) {
-    const startBlock = group.start * BLOCKS_PER_HOUR;
-    const endBlock = group.end * BLOCKS_PER_HOUR;
-
-    html += '<div class="time-group">';
-    html += `<div class="time-group-label">${group.label}</div>`;
-    html += '<div class="time-grid">';
-
-    for (let b = startBlock; b < endBlock; b++) {
-      const future = isFutureBlock(state.dayOffset, b);
-      const isActive = b === state.timeBlock;
-      const isPlaying = isActive && (state.playing || state.loading);
-      let cls = 'time-slot';
-      if (isPlaying) cls += ' playing';
-      else if (isActive) cls += ' active';
-      if (future) cls += ' future';
-      html += `<div class="${cls}" data-block="${b}">${blockToDisplay(b)}</div>`;
-    }
-
-    html += '</div></div>';
+  let html = '<option value="" disabled>Select time</option>';
+  for (let b = 0; b < TOTAL_BLOCKS; b++) {
+    if (b > limit) break;
+    const selected = b === state.timeBlock ? ' selected' : '';
+    html += `<option value="${b}"${selected}>${blockTo12h(b)}</option>`;
   }
+  sel.innerHTML = html;
 
-  container.innerHTML = html;
+  // Keep current selection visible if valid
+  if (state.timeBlock !== null && state.timeBlock <= limit) {
+    sel.value = state.timeBlock;
+  } else if (state.timeBlock !== null) {
+    sel.value = '';
+  }
 }
 
-$('timeGrid').addEventListener('click', (e) => {
-  const slot = e.target.closest('.time-slot');
-  if (!slot || slot.classList.contains('future')) return;
-  state.timeBlock = parseInt(slot.dataset.block, 10);
+$('timeSelect').addEventListener('change', (e) => {
+  state.timeBlock = parseInt(e.target.value, 10);
   playCurrentBlock();
 });
 
-// ── Player Logic ──
+// ══════════════════════════════════
+// Player
+// ══════════════════════════════════
 
 function playCurrentBlock() {
   if (state.timeBlock === null) return;
@@ -203,7 +183,6 @@ function playCurrentBlock() {
   state.loading = true;
   state.playing = false;
   updatePlayerUI();
-  renderTimeGrid();
 
   audio.src = url;
   audio.load();
@@ -211,18 +190,17 @@ function playCurrentBlock() {
     state.loading = false;
     showToast('Playback failed');
     updatePlayerUI();
-    renderTimeGrid();
   });
 }
 
 function togglePlay() {
-  if (state.timeBlock === null) return;
+  if (state.timeBlock === null) {
+    showToast('Select a time first');
+    return;
+  }
   if (audio.paused) {
-    if (!audio.src) {
-      playCurrentBlock();
-    } else {
-      audio.play();
-    }
+    if (!audio.src) playCurrentBlock();
+    else audio.play();
   } else {
     audio.pause();
   }
@@ -237,54 +215,49 @@ function skipBlock(delta) {
       state.dayOffset++;
       next = TOTAL_BLOCKS - 1;
       renderDays();
-    } else {
-      return;
-    }
+      renderTimeOptions();
+    } else return;
   } else if (next >= TOTAL_BLOCKS) {
     if (state.dayOffset > 0) {
       state.dayOffset--;
       next = 0;
       renderDays();
-    } else {
-      return;
-    }
+      renderTimeOptions();
+    } else return;
   }
 
-  if (isFutureBlock(state.dayOffset, next)) return;
+  const limit = state.dayOffset === 0 ? maxBlockToday() : TOTAL_BLOCKS - 1;
+  if (next > limit) return;
+
   state.timeBlock = next;
-  renderTimeGrid();
+  $('timeSelect').value = next;
   playCurrentBlock();
 }
 
-// ── Player UI Update ──
+// ── UI Updates ──
+
+function updatePlayerText() {
+  if (state.timeBlock === null) return;
+  const date = getNZDate(state.dayOffset);
+  const dayLabel = state.dayOffset === 0 ? 'Today'
+    : state.dayOffset === 1 ? 'Yesterday'
+    : `${DAY_NAMES_SHORT[date.getDay()]} ${date.getDate()} ${MONTH_NAMES[date.getMonth()]}`;
+
+  $('playerTitle').textContent = `${regionLabel(state.region)} \u2014 ${blockTo12h(state.timeBlock)}`;
+  $('playerSubtitle').textContent = dayLabel;
+}
 
 function updatePlayerUI() {
-  const show = state.timeBlock !== null;
-  playerBar.classList.toggle('visible', show);
-  document.documentElement.style.setProperty(
-    '--player-height', show ? '110px' : '0px'
-  );
-  if (!show) return;
+  btnPlay.classList.toggle('loading', state.loading);
 
-  playerBar.classList.toggle('loading', state.loading);
-
-  const date = getNZDate(state.dayOffset);
-  const dayLabel = state.dayOffset === 0
-    ? 'Today'
-    : state.dayOffset === 1
-      ? 'Yesterday'
-      : `${DAY_NAMES[date.getDay()]} ${date.getDate()} ${MONTH_NAMES[date.getMonth()]}`;
-
-  $('playerTitle').textContent =
-    `${regionLabel(state.region)} \u2014 ${blockToDisplay(state.timeBlock)}`;
-  $('playerSubtitle').textContent = `${dayLabel} \u2022 15 min block`;
-
-  const playIcon = btnPlay.querySelector('.play-icon');
+  const icon = btnPlay.querySelector('.play-icon');
   if (state.playing) {
-    playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+    icon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
   } else {
-    playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+    icon.innerHTML = '<path d="M8 5v14l11-7z"/>';
   }
+
+  if (state.timeBlock !== null) updatePlayerText();
 }
 
 // ── Audio Events ──
@@ -293,7 +266,6 @@ audio.addEventListener('playing', () => {
   state.loading = false;
   state.playing = true;
   updatePlayerUI();
-  renderTimeGrid();
 });
 
 audio.addEventListener('pause', () => {
@@ -310,14 +282,13 @@ audio.addEventListener('ended', () => {
 audio.addEventListener('error', () => {
   state.loading = false;
   state.playing = false;
-  showToast('Audio not available for this time slot');
+  showToast('Audio not available');
   updatePlayerUI();
-  renderTimeGrid();
 });
 
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
-  progressFill.style.width = (audio.currentTime / audio.duration) * 100 + '%';
+  $('progressFill').style.width = (audio.currentTime / audio.duration) * 100 + '%';
   $('timeCurrent').textContent = formatSecs(audio.currentTime);
   $('timeTotal').textContent = formatSecs(audio.duration);
 });
@@ -327,8 +298,7 @@ audio.addEventListener('timeupdate', () => {
 $('progressWrap').addEventListener('click', (e) => {
   if (!audio.duration) return;
   const rect = e.currentTarget.getBoundingClientRect();
-  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  audio.currentTime = pct * audio.duration;
+  audio.currentTime = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * audio.duration;
 });
 
 // ── Button Events ──
@@ -337,7 +307,7 @@ btnPlay.addEventListener('click', togglePlay);
 $('btnPrev').addEventListener('click', () => skipBlock(-1));
 $('btnNext').addEventListener('click', () => skipBlock(1));
 
-// ── MediaSession (lock screen controls) ──
+// ── MediaSession (lock screen) ──
 
 if ('mediaSession' in navigator) {
   navigator.mediaSession.setActionHandler('play', () => audio.play());
@@ -347,14 +317,14 @@ if ('mediaSession' in navigator) {
 
   audio.addEventListener('playing', () => {
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: `${blockToDisplay(state.timeBlock)} \u2014 ${regionLabel(state.region)}`,
+      title: `${blockTo12h(state.timeBlock)} \u2014 ${regionLabel(state.region)}`,
       artist: 'Newstalk ZB',
       album: 'Week on Demand',
     });
   });
 }
 
-// ── Keyboard Shortcuts ──
+// ── Keyboard ──
 
 document.addEventListener('keydown', (e) => {
   if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
@@ -366,10 +336,8 @@ document.addEventListener('keydown', (e) => {
 
 renderRegions();
 renderDays();
-renderTimeGrid();
+renderTimeOptions();
 updatePlayerUI();
-
-// ── Service Worker ──
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});

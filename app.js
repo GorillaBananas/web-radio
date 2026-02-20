@@ -4,6 +4,8 @@ var BLOCK_MIN = 15;
 var BPH = 60 / BLOCK_MIN;            // blocks per hour
 var TOTAL = 24 * BPH;                // 96 blocks/day
 var NZ_OFF = 13;                      // NZDT = UTC+13
+var DEFAULT_BLOCK = 28;               // 7:00 am
+var MAX_RETRIES = 2;
 var DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -15,11 +17,13 @@ var S = {
   playing: false,
   loading: false
 };
+var _retryCount = 0;
 
 // ── DOM shortcuts ──
 function $(id) { return document.getElementById(id); }
 var audio   = $('audio');
 var btnPlay = $('btnPlay');
+var appEl   = document.querySelector('.app');
 
 // ── NZ time helpers ──
 
@@ -201,6 +205,7 @@ function updateNow() {
 }
 
 function updateUI() {
+  appEl.classList.toggle('is-playing', S.playing);
   btnPlay.classList.toggle('loading', S.loading);
   var icon = btnPlay.querySelector('.play-icon');
   icon.innerHTML = S.playing
@@ -212,6 +217,7 @@ function updateUI() {
 // ── Audio Events ──
 
 audio.addEventListener('playing', function() {
+  _retryCount = 0;
   S.loading = false; S.playing = true; updateUI();
 });
 audio.addEventListener('pause', function() {
@@ -222,8 +228,15 @@ audio.addEventListener('ended', function() {
 });
 audio.addEventListener('error', function() {
   S.loading = false; S.playing = false;
-  toast('Audio not available');
   updateUI();
+  if (_retryCount < MAX_RETRIES) {
+    _retryCount++;
+    toast('Trying next block\u2026');
+    setTimeout(function() { skip(1); }, 500);
+  } else {
+    _retryCount = 0;
+    toast('Audio not available');
+  }
 });
 audio.addEventListener('timeupdate', function() {
   if (!audio.duration) return;
@@ -298,6 +311,8 @@ if ('mediaSession' in navigator) {
   navigator.mediaSession.setActionHandler('pause', function() { audio.pause(); });
   navigator.mediaSession.setActionHandler('previoustrack', function() { skip(-1); });
   navigator.mediaSession.setActionHandler('nexttrack', function() { skip(1); });
+  navigator.mediaSession.setActionHandler('seekforward', function() { seekBy(30); });
+  navigator.mediaSession.setActionHandler('seekbackward', function() { seekBy(-15); });
   audio.addEventListener('playing', function() {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: to12(S.block) + ' \u2014 ' + cap(S.region),
@@ -315,6 +330,13 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ── Init ──
+
+// Default to 7:00 am — if today hasn't reached 7am NZ time, use yesterday
+S.block = DEFAULT_BLOCK;
+if (S.day === 0 && maxBlock() < DEFAULT_BLOCK) {
+  S.day = 1;
+}
+
 renderRegion();
 renderDays();
 renderTime();

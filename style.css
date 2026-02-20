@@ -31,6 +31,7 @@ html {
   display: grid;
   grid-template-rows: auto 1fr 1fr;
   background: var(--bg);
+  overflow: hidden;
 }
 
 /* ════════════════════════════════
@@ -66,19 +67,21 @@ html {
   background: var(--surface);
   border-radius: 12px;
   padding: 3px;
+  min-width: 0;
 }
 
 .seg button {
   flex: 1;
   border: none;
   border-radius: 10px;
-  padding: 12px 6px;
+  padding: 12px 4px;
   background: transparent;
   color: var(--text2);
   font: 600 15px/1 inherit;
   cursor: pointer;
   transition: all .15s;
   touch-action: manipulation;
+  min-width: 0;
 }
 .seg button:active { opacity: .7; }
 .seg button.on {
@@ -144,11 +147,32 @@ html {
   background-position: right 18px center;
   background-size: 28px 28px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='%23666' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  transition: border-color .3s, box-shadow .3s;
 }
 
 .now-sub {
   font-size: 14px;
   color: var(--dim);
+}
+
+/* ════════════════════════════════
+   Playing state indicators
+   ════════════════════════════════ */
+.is-playing .sel-time {
+  border-color: var(--accent);
+  box-shadow: 0 0 24px rgba(230,57,70,.15);
+}
+
+.is-playing .now-title::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+  animation: pulse 2s ease-in-out infinite;
 }
 
 /* ════════════════════════════════
@@ -180,12 +204,12 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 6px;
   width: 100%;
   max-width: 420px;
 }
 
-/* Shared button reset */
+/* Shared button reset — NO flex-shrink:0 so buttons can shrink on narrow screens */
 .btn-block, .btn-seek, .btn-play {
   border: none;
   cursor: pointer;
@@ -195,6 +219,7 @@ html {
   transition: transform .1s, opacity .1s;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  aspect-ratio: 1;
 }
 .btn-block:active, .btn-seek:active, .btn-play:active {
   transform: scale(.9);
@@ -204,27 +229,23 @@ html {
 /* ── Block skip ── */
 .btn-block {
   width: 52px;
-  height: 52px;
   border-radius: 50%;
   background: transparent;
   color: var(--text2);
-  flex-shrink: 0;
 }
-.btn-block svg { width: 30px; height: 30px; }
+.btn-block svg { width: 58%; height: 58%; }
 
 /* ── Seek 15s / 30s ── */
 .btn-seek {
   position: relative;
   width: 76px;
-  height: 76px;
   border-radius: 50%;
   background: transparent;
   color: var(--text);
-  flex-shrink: 0;
 }
 .btn-seek svg {
-  width: 76px;
-  height: 76px;
+  width: 100%;
+  height: 100%;
 }
 .seek-label {
   position: absolute;
@@ -242,14 +263,13 @@ html {
 /* ── Play / Pause ── */
 .btn-play {
   width: 92px;
-  height: 92px;
   border-radius: 50%;
   background: var(--accent);
   color: #fff;
   box-shadow: 0 0 48px var(--glow), 0 4px 24px rgba(0,0,0,.4);
-  flex-shrink: 0;
+  flex-shrink: .5;
 }
-.btn-play svg { width: 46px; height: 46px; }
+.btn-play svg { width: 50%; height: 50%; }
 
 /* Loading spinner */
 .spinner {
@@ -262,7 +282,6 @@ html {
 }
 .btn-play.loading .spinner { display: block; }
 .btn-play.loading .play-icon { display: none; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── +6 min button ── */
 .btn-fwd5 {
@@ -354,4 +373,69 @@ html {
 .toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* ════════════════════════════════
+   Animations
+   ════════════════════════════════ */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+
+/* ════════════════════════════════
+   LANDSCAPE: 2-column layout for car cradles
+   ════════════════════════════════ */
+@media (orientation: landscape) and (max-height: 500px) {
+  .app {
+    grid-template-rows: auto 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .header {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 16px;
+  }
+
+  .brand {
+    font-size: 14px;
+    white-space: nowrap;
+    margin-right: 4px;
+  }
+
+  .header-row { flex: 1; }
+
+  .time-hero {
+    padding: 12px 20px;
+    gap: 6px;
+    border-right: 1px solid var(--border);
+  }
+
+  .time-label { font-size: 11px; }
+
+  .sel-time {
+    font-size: 30px;
+    padding: 14px 44px 14px 16px;
+    max-width: 300px;
+  }
+
+  .player {
+    padding: 8px 16px 12px;
+    gap: 10px;
+  }
+
+  .now-title { font-size: 15px; min-height: 18px; }
+
+  .controls { gap: 4px; }
+  .btn-play { width: 72px; }
+  .btn-seek { width: 56px; }
+  .seek-label { font-size: 12px; }
+  .btn-block { width: 38px; }
+
+  .btn-fwd5 { font-size: 13px; padding: 6px 18px; }
+  .prog-t { font-size: 13px; min-width: 36px; }
+  .prog { max-width: 360px; }
 }

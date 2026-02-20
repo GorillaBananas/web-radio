@@ -374,5 +374,15 @@ renderTime();
 updateUI();
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(function(){});
+  // updateViaCache:'none' — always fetch sw.js from network, never HTTP cache
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(function(){});
+
+  // When a new SW activates and takes control, reload to get fresh assets
+  var refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function() {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
 }

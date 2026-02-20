@@ -1,15 +1,12 @@
 var CACHE = 'zb-v10';
-var SHELL = ['/', '/index.html', '/style.css', '/app.js', '/manifest.json'];
 
-self.addEventListener('install', function(e) {
-  e.waitUntil(
-    caches.open(CACHE)
-      .then(function(c) { return c.addAll(SHELL); })
-      .then(function() { return self.skipWaiting(); })
-  );
+self.addEventListener('install', function() {
+  // Take over immediately — don't wait for old tabs to close
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', function(e) {
+  // Purge all old caches, then claim all clients
   e.waitUntil(
     caches.keys().then(function(keys) {
       return Promise.all(
@@ -23,10 +20,10 @@ self.addEventListener('activate', function(e) {
 self.addEventListener('fetch', function(e) {
   var url = new URL(e.request.url);
 
-  // Audio streams: always network
+  // Audio streams: always network, never cache
   if (url.hostname === 'weekondemand.newstalkzb.co.nz') return;
 
-  // App shell: network-first so updates show immediately
+  // Everything else: network-first, cache fallback (offline support)
   e.respondWith(
     fetch(e.request).then(function(res) {
       if (e.request.method === 'GET' && url.origin === self.location.origin) {

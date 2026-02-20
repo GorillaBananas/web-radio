@@ -230,7 +230,13 @@ audio.addEventListener('timeupdate', function() {
   $('timeTot').textContent = fmtSec(audio.duration);
 });
 
-// ── Seek ──
+// ── Seek by seconds ──
+function seekBy(secs) {
+  if (!audio.duration) return;
+  audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + secs));
+}
+
+// ── Progress bar seek ──
 $('progBar').addEventListener('click', function(e) {
   if (!audio.duration) return;
   var r = e.currentTarget.getBoundingClientRect();
@@ -241,6 +247,8 @@ $('progBar').addEventListener('click', function(e) {
 btnPlay.addEventListener('click', toggle);
 $('btnPrev').addEventListener('click', function() { skip(-1); });
 $('btnNext').addEventListener('click', function() { skip(1); });
+$('btnBack15').addEventListener('click', function() { seekBy(-15); });
+$('btnFwd30').addEventListener('click', function() { seekBy(30); });
 
 // ── MediaSession ──
 if ('mediaSession' in navigator) {

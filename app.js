@@ -236,12 +236,51 @@ function seekBy(secs) {
   audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + secs));
 }
 
-// ── Progress bar seek ──
-$('progBar').addEventListener('click', function(e) {
+// ── Progress bar: tap + drag scrubbing ──
+var progBar = $('progBar');
+var scrubbing = false;
+
+function scrubTo(clientX) {
   if (!audio.duration) return;
-  var r = e.currentTarget.getBoundingClientRect();
-  audio.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * audio.duration;
+  var r = progBar.getBoundingClientRect();
+  var pct = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+  audio.currentTime = pct * audio.duration;
+  $('progFill').style.width = (pct * 100) + '%';
+  $('timeCur').textContent = fmtSec(pct * audio.duration);
+}
+
+progBar.addEventListener('click', function(e) { scrubTo(e.clientX); });
+
+function scrubStart() { scrubbing = true; progBar.classList.add('scrubbing'); }
+function scrubEnd() { scrubbing = false; progBar.classList.remove('scrubbing'); }
+
+progBar.addEventListener('touchstart', function(e) {
+  if (!audio.duration) return;
+  scrubStart();
+  scrubTo(e.touches[0].clientX);
+  e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('touchmove', function(e) {
+  if (!scrubbing) return;
+  scrubTo(e.touches[0].clientX);
+  e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('touchend', function() { scrubEnd(); });
+
+progBar.addEventListener('mousedown', function(e) {
+  if (!audio.duration) return;
+  scrubStart();
+  scrubTo(e.clientX);
 });
+
+document.addEventListener('mousemove', function(e) {
+  if (!scrubbing) return;
+  scrubTo(e.clientX);
+});
+
+document.addEventListener('mouseup', function() { scrubEnd(); });
 
 // ── Buttons ──
 btnPlay.addEventListener('click', toggle);
@@ -249,6 +288,7 @@ $('btnPrev').addEventListener('click', function() { skip(-1); });
 $('btnNext').addEventListener('click', function() { skip(1); });
 $('btnBack15').addEventListener('click', function() { seekBy(-15); });
 $('btnFwd30').addEventListener('click', function() { seekBy(30); });
+$('btnFwd5m').addEventListener('click', function() { seekBy(300); });
 
 // ── MediaSession ──
 if ('mediaSession' in navigator) {

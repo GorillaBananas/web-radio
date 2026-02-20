@@ -192,14 +192,12 @@ function skip(d) {
 function updateNow() {
   if (S.block === null) {
     $('nowTitle').textContent = '';
-    $('nowSub').textContent = '15-minute blocks';
     return;
   }
   var d = nzDate(S.day);
   var dayLbl = S.day === 0 ? 'Today' : S.day === 1 ? 'Yesterday' :
     DAYS_SHORT[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
   $('nowTitle').textContent = cap(S.region) + ' \u2014 ' + dayLbl;
-  $('nowSub').textContent = dayLbl;
 }
 
 function updateUI() {
@@ -292,7 +290,7 @@ $('btnPrev').addEventListener('click', function() { skip(-1); });
 $('btnNext').addEventListener('click', function() { skip(1); });
 $('btnBack15').addEventListener('click', function() { seekBy(-15); });
 $('btnFwd30').addEventListener('click', function() { seekBy(30); });
-$('btnFwd5m').addEventListener('click', function() { seekBy(300); });
+$('btnFwd5m').addEventListener('click', function() { seekBy(360); });
 
 // ── MediaSession ──
 if ('mediaSession' in navigator) {

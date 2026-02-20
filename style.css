@@ -5,8 +5,8 @@
   --surface: #161616;
   --elevated: #222;
   --text: #fff;
-  --text2: #999;
-  --dim: #555;
+  --text2: #aaa;
+  --dim: #666;
   --accent: #e63946;
   --glow: rgba(230,57,70,.35);
   --border: rgba(255,255,255,.08);
@@ -20,7 +20,7 @@ html {
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
-  touch-action: manipulation;       /* kill double-tap zoom globally */
+  touch-action: manipulation;
 }
 
 /* ── Full-screen grid: header | time hero | player ── */
@@ -29,7 +29,7 @@ html {
   inset: 0;
   padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0);
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto 1fr 1fr;
   background: var(--bg);
 }
 
@@ -37,7 +37,7 @@ html {
    HEADER: brand + region + day (compact)
    ════════════════════════════════ */
 .header {
-  padding: 10px 14px 8px;
+  padding: 10px 16px 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -45,10 +45,11 @@ html {
 }
 
 .brand {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   text-align: center;
   letter-spacing: -.3px;
+  color: var(--text2);
 }
 .brand span { color: var(--accent); }
 
@@ -63,18 +64,18 @@ html {
   display: flex;
   flex: 1;
   background: var(--surface);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 3px;
 }
 
 .seg button {
   flex: 1;
   border: none;
-  border-radius: 8px;
-  padding: 9px 4px;
+  border-radius: 10px;
+  padding: 12px 6px;
   background: transparent;
   color: var(--text2);
-  font: 500 13px/1 inherit;
+  font: 600 15px/1 inherit;
   cursor: pointer;
   transition: all .15s;
   touch-action: manipulation;
@@ -83,7 +84,7 @@ html {
 .seg button.on {
   background: var(--accent);
   color: #fff;
-  font-weight: 600;
+  font-weight: 700;
   box-shadow: 0 2px 12px var(--glow);
 }
 
@@ -92,10 +93,10 @@ html {
   color: var(--text);
   background: var(--surface);
   border: 1.5px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
   -webkit-appearance: none;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='%23999' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%23999' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   touch-action: manipulation;
 }
@@ -105,81 +106,83 @@ html {
 /* Day select: compact, fits in header row */
 .sel-day {
   width: auto;
-  min-width: 110px;
-  padding: 9px 32px 9px 12px;
-  font: 500 13px/1.2 inherit;
-  background-position: right 8px center;
+  min-width: 120px;
+  padding: 12px 34px 12px 14px;
+  font: 600 15px/1.2 inherit;
+  background-position: right 10px center;
 }
 
 /* ════════════════════════════════
-   TIME HERO: huge centered selector
+   TIME HERO: huge centered selector — fills half the screen
    ════════════════════════════════ */
 .time-hero {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px 20px;
-  gap: 6px;
+  padding: 20px 24px;
+  gap: 10px;
 }
 
 .time-label {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: .8px;
+  letter-spacing: 1px;
   color: var(--dim);
 }
 
 .sel-time {
   width: 100%;
-  max-width: 340px;
-  padding: 18px 48px 18px 20px;
-  font: 700 28px/1.1 inherit;
+  max-width: 380px;
+  padding: 22px 52px 22px 24px;
+  font: 700 38px/1.1 inherit;
   text-align: center;
   letter-spacing: -.5px;
-  background-position: right 16px center;
-  background-size: 24px 24px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='%23999' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  border-radius: 16px;
+  border-width: 2px;
+  background-position: right 18px center;
+  background-size: 28px 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='%23666' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
 .now-sub {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--dim);
 }
 
 /* ════════════════════════════════
-   PLAYER: fills remaining space
+   PLAYER: fills remaining half of screen
    ════════════════════════════════ */
 .player {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 14px 20px;
-  gap: 16px;
+  padding: 0 20px 24px;
+  gap: 20px;
   min-height: 0;
 }
 
 .now-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--text2);
   text-align: center;
   letter-spacing: -.2px;
-  min-height: 20px;
+  min-height: 22px;
 }
 
 /* ════════════════════════════════
-   Transport controls — Spotify podcast style
+   Transport controls
    ════════════════════════════════ */
 .controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
 }
 
 /* Shared button reset */
@@ -198,37 +201,37 @@ html {
   opacity: .85;
 }
 
-/* ── Block skip: subtle edges ── */
+/* ── Block skip ── */
 .btn-block {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: transparent;
   color: var(--text2);
   flex-shrink: 0;
 }
-.btn-block svg { width: 24px; height: 24px; }
+.btn-block svg { width: 30px; height: 30px; }
 
-/* ── Seek 15s / 30s: Spotify-style ── */
+/* ── Seek 15s / 30s ── */
 .btn-seek {
   position: relative;
-  width: 64px;
-  height: 64px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   background: transparent;
   color: var(--text);
   flex-shrink: 0;
 }
 .btn-seek svg {
-  width: 64px;
-  height: 64px;
+  width: 76px;
+  height: 76px;
 }
 .seek-label {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   letter-spacing: -.5px;
   color: var(--text);
@@ -236,22 +239,22 @@ html {
   pointer-events: none;
 }
 
-/* ── Play / Pause: large, red, glowing ── */
+/* ── Play / Pause ── */
 .btn-play {
-  width: 80px;
-  height: 80px;
+  width: 92px;
+  height: 92px;
   border-radius: 50%;
   background: var(--accent);
   color: #fff;
-  box-shadow: 0 0 40px var(--glow), 0 4px 20px rgba(0,0,0,.4);
+  box-shadow: 0 0 48px var(--glow), 0 4px 24px rgba(0,0,0,.4);
   flex-shrink: 0;
 }
-.btn-play svg { width: 40px; height: 40px; }
+.btn-play svg { width: 46px; height: 46px; }
 
 /* Loading spinner */
 .spinner {
   display: none;
-  width: 34px; height: 34px;
+  width: 38px; height: 38px;
   border: 3px solid transparent;
   border-top-color: #fff;
   border-radius: 50%;
@@ -261,14 +264,14 @@ html {
 .btn-play.loading .play-icon { display: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── +5 min button ── */
+/* ── +6 min button ── */
 .btn-fwd5 {
   border: 1.5px solid var(--border);
   border-radius: 999px;
   background: transparent;
   color: var(--text2);
-  font: 600 13px/1 inherit;
-  padding: 8px 20px;
+  font: 600 15px/1 inherit;
+  padding: 10px 24px;
   cursor: pointer;
   letter-spacing: -.2px;
   transition: all .15s;
@@ -284,34 +287,35 @@ html {
 /* ── Progress ── */
 .prog {
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .prog-t {
-  font-size: 12px;
+  font-size: 15px;
+  font-weight: 500;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
-  min-width: 34px;
+  min-width: 42px;
 }
 .prog-t:last-child { text-align: right; }
 
 .prog-bar {
   flex: 1;
-  height: 40px;
+  height: 44px;
   display: flex;
   align-items: center;
   cursor: pointer;
-  touch-action: none;              /* allow custom drag on progress bar */
+  touch-action: none;
 }
 
 .prog-track {
   width: 100%;
-  height: 4px;
+  height: 5px;
   background: var(--border);
-  border-radius: 2px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
@@ -319,12 +323,12 @@ html {
   height: 100%;
   width: 0%;
   background: var(--accent);
-  border-radius: 2px;
+  border-radius: 3px;
   transition: width .25s linear;
 }
 
 .prog-bar:active .prog-track,
-.prog-bar.scrubbing .prog-track { height: 8px; }
+.prog-bar.scrubbing .prog-track { height: 10px; }
 
 /* ════════════════════════════════
    Toast
@@ -336,9 +340,9 @@ html {
   transform: translateX(-50%) translateY(-20px);
   background: var(--elevated);
   color: var(--text);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 999px;
   border: 1px solid var(--border);
   opacity: 0;

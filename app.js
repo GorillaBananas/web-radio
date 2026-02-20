@@ -190,11 +190,15 @@ function skip(d) {
 // ── UI Updates ──
 
 function updateNow() {
-  if (S.block === null) return;
+  if (S.block === null) {
+    $('nowTitle').textContent = '';
+    $('nowSub').textContent = '15-minute blocks';
+    return;
+  }
   var d = nzDate(S.day);
   var dayLbl = S.day === 0 ? 'Today' : S.day === 1 ? 'Yesterday' :
     DAYS_SHORT[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
-  $('nowTitle').textContent = cap(S.region) + ' \u2014 ' + to12(S.block);
+  $('nowTitle').textContent = cap(S.region) + ' \u2014 ' + dayLbl;
   $('nowSub').textContent = dayLbl;
 }
 

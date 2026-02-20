@@ -20,61 +20,48 @@ html {
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
+  touch-action: manipulation;       /* kill double-tap zoom globally */
 }
 
-/* ── Full-screen grid: selectors on top, player fills rest ── */
+/* ── Full-screen grid: header | time hero | player ── */
 .app {
   position: fixed;
   inset: 0;
   padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0);
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto 1fr;
   background: var(--bg);
 }
 
 /* ════════════════════════════════
-   TOP: Pickers
+   HEADER: brand + region + day (compact)
    ════════════════════════════════ */
-.pick {
-  padding: 14px 16px 10px;
+.header {
+  padding: 10px 14px 8px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   border-bottom: 1px solid var(--border);
 }
 
 .brand {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   text-align: center;
   letter-spacing: -.3px;
 }
 .brand span { color: var(--accent); }
 
-.pick-group {
+.header-row {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  align-items: stretch;
 }
-
-.pick-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .8px;
-  color: var(--dim);
-}
-
-.pick-row {
-  display: flex;
-  gap: 10px;
-}
-
-.pick-grow { flex: 1; }
 
 /* ── Segmented control (region) ── */
 .seg {
   display: flex;
+  flex: 1;
   background: var(--surface);
   border-radius: 10px;
   padding: 3px;
@@ -84,12 +71,13 @@ html {
   flex: 1;
   border: none;
   border-radius: 8px;
-  padding: 10px 6px;
+  padding: 9px 4px;
   background: transparent;
   color: var(--text2);
-  font: 500 14px/1 inherit;
+  font: 500 13px/1 inherit;
   cursor: pointer;
   transition: all .15s;
+  touch-action: manipulation;
 }
 .seg button:active { opacity: .7; }
 .seg button.on {
@@ -99,11 +87,8 @@ html {
   box-shadow: 0 2px 12px var(--glow);
 }
 
-/* ── Native selects (day + time) ── */
+/* ── Shared select style ── */
 .sel {
-  width: 100%;
-  padding: 11px 36px 11px 12px;
-  font: 500 15px/1.2 inherit;
   color: var(--text);
   background: var(--surface);
   border: 1.5px solid var(--border);
@@ -112,48 +97,89 @@ html {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='%23999' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  touch-action: manipulation;
 }
 .sel:focus { outline: none; border-color: var(--accent); }
 .sel option { background: #1a1a1a; color: #fff; }
 
+/* Day select: compact, fits in header row */
+.sel-day {
+  width: auto;
+  min-width: 110px;
+  padding: 9px 32px 9px 12px;
+  font: 500 13px/1.2 inherit;
+  background-position: right 8px center;
+}
+
 /* ════════════════════════════════
-   BOTTOM: Player
+   TIME HERO: huge centered selector
+   ════════════════════════════════ */
+.time-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 20px;
+  gap: 6px;
+}
+
+.time-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--dim);
+}
+
+.sel-time {
+  width: 100%;
+  max-width: 340px;
+  padding: 18px 48px 18px 20px;
+  font: 700 28px/1.1 inherit;
+  text-align: center;
+  letter-spacing: -.5px;
+  background-position: right 16px center;
+  background-size: 24px 24px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='%23999' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+}
+
+.now-sub {
+  font-size: 13px;
+  color: var(--dim);
+}
+
+/* ════════════════════════════════
+   PLAYER: fills remaining space
    ════════════════════════════════ */
 .player {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px 12px 24px;
-  gap: 20px;
+  padding: 0 14px 20px;
+  gap: 16px;
   min-height: 0;
 }
 
-/* Now-playing text */
-.now { text-align: center; }
 .now-title {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -.3px;
-}
-.now-sub {
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 600;
   color: var(--text2);
-  margin-top: 4px;
+  text-align: center;
+  letter-spacing: -.2px;
+  min-height: 20px;
 }
 
 /* ════════════════════════════════
    Transport controls — Spotify podcast style
-   5 buttons: [prev block] [seek -15s] [PLAY] [seek +30s] [next block]
    ════════════════════════════════ */
 .controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
 }
 
 /* Shared button reset */
@@ -165,68 +191,67 @@ html {
   justify-content: center;
   transition: transform .1s, opacity .1s;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .btn-block:active, .btn-seek:active, .btn-play:active {
   transform: scale(.9);
   opacity: .85;
 }
 
-/* ── Block skip: small, subtle ── */
+/* ── Block skip: subtle edges ── */
 .btn-block {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: transparent;
   color: var(--text2);
   flex-shrink: 0;
 }
-.btn-block svg { width: 22px; height: 22px; }
+.btn-block svg { width: 24px; height: 24px; }
 
-/* ── Seek 15s / 30s: prominent, Spotify-style ── */
+/* ── Seek 15s / 30s: Spotify-style ── */
 .btn-seek {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: transparent;
   color: var(--text);
   flex-shrink: 0;
 }
 .btn-seek svg {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
 }
-
-/* Number overlay centered on the circular arrow */
 .seek-label {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   letter-spacing: -.5px;
   color: var(--text);
-  margin-top: 2px;    /* optical: arrow top is heavier */
+  margin-top: 2px;
   pointer-events: none;
 }
 
 /* ── Play / Pause: large, red, glowing ── */
 .btn-play {
-  width: 72px;
-  height: 72px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background: var(--accent);
   color: #fff;
-  box-shadow: 0 0 36px var(--glow), 0 4px 16px rgba(0,0,0,.4);
+  box-shadow: 0 0 40px var(--glow), 0 4px 20px rgba(0,0,0,.4);
   flex-shrink: 0;
 }
-.btn-play svg { width: 36px; height: 36px; }
+.btn-play svg { width: 40px; height: 40px; }
 
 /* Loading spinner */
 .spinner {
   display: none;
-  width: 32px; height: 32px;
+  width: 34px; height: 34px;
   border: 3px solid transparent;
   border-top-color: #fff;
   border-radius: 50%;
@@ -243,11 +268,12 @@ html {
   background: transparent;
   color: var(--text2);
   font: 600 13px/1 inherit;
-  padding: 8px 18px;
+  padding: 8px 20px;
   cursor: pointer;
   letter-spacing: -.2px;
   transition: all .15s;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .btn-fwd5:active {
   transform: scale(.93);
@@ -258,7 +284,7 @@ html {
 /* ── Progress ── */
 .prog {
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -274,10 +300,11 @@ html {
 
 .prog-bar {
   flex: 1;
-  height: 36px;
+  height: 40px;
   display: flex;
   align-items: center;
   cursor: pointer;
+  touch-action: none;              /* allow custom drag on progress bar */
 }
 
 .prog-track {

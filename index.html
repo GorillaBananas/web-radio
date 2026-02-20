@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0a0a0a">
@@ -10,74 +10,55 @@
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
   <title>ZB On Demand</title>
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 
 <div class="app">
 
-  <!-- ── Selectors ── -->
-  <div class="pick">
-
+  <!-- ── Compact header: brand + region + day ── -->
+  <div class="header">
     <div class="brand">Newstalk<span>ZB</span></div>
-
-    <div class="pick-group">
-      <label class="pick-label">Region</label>
+    <div class="header-row">
       <div class="seg" id="regionSeg"></div>
+      <select class="sel sel-day" id="daySel"></select>
     </div>
+  </div>
 
-    <div class="pick-row">
-      <div class="pick-group pick-grow">
-        <label class="pick-label">Day</label>
-        <select class="sel" id="daySel"></select>
-      </div>
-      <div class="pick-group pick-grow">
-        <label class="pick-label">Time</label>
-        <select class="sel" id="timeSel">
-          <option value="" disabled selected>--:--</option>
-        </select>
-      </div>
-    </div>
-
+  <!-- ── Hero: time selector ── -->
+  <div class="time-hero">
+    <label class="time-label">Select time block</label>
+    <select class="sel sel-time" id="timeSel">
+      <option value="" disabled selected>--:--</option>
+    </select>
+    <div class="now-sub" id="nowSub">15-minute blocks</div>
   </div>
 
   <!-- ── Player ── -->
   <div class="player">
 
-    <div class="now">
-      <div class="now-title" id="nowTitle">Select a time to begin</div>
-      <div class="now-sub" id="nowSub">15-minute blocks</div>
-    </div>
+    <div class="now-title" id="nowTitle"></div>
 
     <div class="controls">
-      <!-- Previous block -->
       <button class="btn-block" id="btnPrev" aria-label="Previous block">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
       </button>
-
-      <!-- Seek back 15s -->
       <button class="btn-seek" id="btnBack15" aria-label="Back 15 seconds">
         <svg viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
         </svg>
         <span class="seek-label">15</span>
       </button>
-
-      <!-- Play / Pause -->
       <button class="btn-play" id="btnPlay" aria-label="Play">
         <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         <div class="spinner"></div>
       </button>
-
-      <!-- Seek forward 30s -->
       <button class="btn-seek" id="btnFwd30" aria-label="Forward 30 seconds">
         <svg viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/>
         </svg>
         <span class="seek-label">30</span>
       </button>
-
-      <!-- Next block -->
       <button class="btn-block" id="btnNext" aria-label="Next block">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
       </button>
@@ -101,6 +82,6 @@
 
 <div class="toast" id="toast"></div>
 <audio id="audio" preload="none"></audio>
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>

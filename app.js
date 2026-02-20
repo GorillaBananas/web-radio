@@ -129,7 +129,7 @@ $('daySel').addEventListener('change', function(e) {
   updateNow();
 });
 
-// Time dropdown
+// Time dropdown (hidden select — drives the visible time-display)
 function renderTime() {
   var sel = $('timeSel');
   var lim = S.day === 0 ? maxBlock() : TOTAL - 1;
@@ -140,12 +140,24 @@ function renderTime() {
   }
   sel.innerHTML = html;
   if (S.block !== null && S.block <= lim) sel.value = S.block;
+  updateTimeDisplay();
 }
 
 $('timeSel').addEventListener('change', function(e) {
   S.block = parseInt(e.target.value, 10);
+  updateTimeDisplay();
   play();
 });
+
+// ── Time display sync ──
+function updateTimeDisplay() {
+  var el = $('timeDisplay');
+  if (S.block === null) {
+    el.textContent = '--:--';
+  } else {
+    el.textContent = to12(S.block);
+  }
+}
 
 // ══════════════════════════
 // PLAYER
@@ -188,6 +200,7 @@ function skip(d) {
   if (next > lim) return;
   S.block = next;
   $('timeSel').value = next;
+  updateTimeDisplay();
   play();
 }
 
@@ -211,6 +224,7 @@ function updateUI() {
   icon.innerHTML = S.playing
     ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
     : '<path d="M8 5v14l11-7z"/>';
+  updateTimeDisplay();
   if (S.block !== null) updateNow();
 }
 
@@ -219,6 +233,7 @@ function updateUI() {
 audio.addEventListener('playing', function() {
   _retryCount = 0;
   S.loading = false; S.playing = true; updateUI();
+  updatePositionState();
 });
 audio.addEventListener('pause', function() {
   S.playing = false; updateUI();
@@ -249,6 +264,20 @@ audio.addEventListener('timeupdate', function() {
 function seekBy(secs) {
   if (!audio.duration) return;
   audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + secs));
+  updatePositionState();
+}
+
+// ── MediaSession position state (improves lock screen accuracy) ──
+function updatePositionState() {
+  if ('mediaSession' in navigator && navigator.mediaSession.setPositionState && audio.duration) {
+    try {
+      navigator.mediaSession.setPositionState({
+        duration: audio.duration,
+        playbackRate: audio.playbackRate || 1,
+        position: audio.currentTime
+      });
+    } catch(e) {}
+  }
 }
 
 // ── Progress bar: tap + drag scrubbing ──
@@ -264,10 +293,10 @@ function scrubTo(clientX) {
   $('timeCur').textContent = fmtSec(pct * audio.duration);
 }
 
-progBar.addEventListener('click', function(e) { scrubTo(e.clientX); });
+progBar.addEventListener('click', function(e) { scrubTo(e.clientX); updatePositionState(); });
 
 function scrubStart() { scrubbing = true; progBar.classList.add('scrubbing'); }
-function scrubEnd() { scrubbing = false; progBar.classList.remove('scrubbing'); }
+function scrubEnd() { scrubbing = false; progBar.classList.remove('scrubbing'); updatePositionState(); }
 
 progBar.addEventListener('touchstart', function(e) {
   if (!audio.duration) return;
@@ -282,7 +311,7 @@ document.addEventListener('touchmove', function(e) {
   e.preventDefault();
 }, { passive: false });
 
-document.addEventListener('touchend', function() { scrubEnd(); });
+document.addEventListener('touchend', function() { if (scrubbing) scrubEnd(); });
 
 progBar.addEventListener('mousedown', function(e) {
   if (!audio.duration) return;
@@ -295,7 +324,7 @@ document.addEventListener('mousemove', function(e) {
   scrubTo(e.clientX);
 });
 
-document.addEventListener('mouseup', function() { scrubEnd(); });
+document.addEventListener('mouseup', function() { if (scrubbing) scrubEnd(); });
 
 // ── Buttons ──
 btnPlay.addEventListener('click', toggle);
@@ -303,14 +332,16 @@ $('btnPrev').addEventListener('click', function() { skip(-1); });
 $('btnNext').addEventListener('click', function() { skip(1); });
 $('btnBack15').addEventListener('click', function() { seekBy(-15); });
 $('btnFwd30').addEventListener('click', function() { seekBy(30); });
-$('btnFwd5m').addEventListener('click', function() { seekBy(360); });
+$('btnFwd6m').addEventListener('click', function() { seekBy(360); });
+$('btnFwd7m').addEventListener('click', function() { seekBy(420); });
 
-// ── MediaSession ──
+// ── MediaSession (lock screen / CarPlay controls) ──
 if ('mediaSession' in navigator) {
   navigator.mediaSession.setActionHandler('play', function() { audio.play(); });
   navigator.mediaSession.setActionHandler('pause', function() { audio.pause(); });
   navigator.mediaSession.setActionHandler('previoustrack', function() { skip(-1); });
   navigator.mediaSession.setActionHandler('nexttrack', function() { skip(1); });
+  // Always seek our amounts regardless of system-suggested offset
   navigator.mediaSession.setActionHandler('seekforward', function() { seekBy(30); });
   navigator.mediaSession.setActionHandler('seekbackward', function() { seekBy(-15); });
   audio.addEventListener('playing', function() {

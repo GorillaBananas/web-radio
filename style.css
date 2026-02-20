@@ -91,7 +91,7 @@ html {
   box-shadow: 0 2px 12px var(--glow);
 }
 
-/* ── Shared select style ── */
+/* ── Day select ── */
 .sel {
   color: var(--text);
   background: var(--surface);
@@ -106,7 +106,6 @@ html {
 .sel:focus { outline: none; border-color: var(--accent); }
 .sel option { background: #1a1a1a; color: #fff; }
 
-/* Day select: compact, fits in header row */
 .sel-day {
   width: auto;
   min-width: 120px;
@@ -116,7 +115,7 @@ html {
 }
 
 /* ════════════════════════════════
-   TIME HERO: huge centered selector — fills half the screen
+   TIME HERO: huge centered display — fills half the screen
    ════════════════════════════════ */
 .time-hero {
   display: flex;
@@ -128,37 +127,69 @@ html {
 }
 
 .time-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--dim);
 }
 
-.sel-time {
+/* Wrapper: display div with invisible select on top */
+.time-wrap {
+  position: relative;
   width: 100%;
   max-width: 380px;
-  padding: 22px 52px 22px 24px;
-  font: 700 38px/1.1 inherit;
+}
+
+.time-display {
+  font: 700 52px/1.1 inherit;
   text-align: center;
-  letter-spacing: -.5px;
+  color: var(--text);
+  padding: 22px 24px;
+  background: var(--surface);
+  border: 2px solid var(--border);
   border-radius: 16px;
-  border-width: 2px;
-  background-position: right 18px center;
-  background-size: 28px 28px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='%23666' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  letter-spacing: -1px;
   transition: border-color .3s, box-shadow .3s;
 }
 
+/* Down-arrow affordance */
+.time-wrap::after {
+  content: '';
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='%23666' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat center;
+  pointer-events: none;
+}
+
+/* Invisible select covers entire display — tapping opens native iOS picker */
+.time-select-hidden {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 16px;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
+  border: none;
+}
+
 .now-sub {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--dim);
 }
 
 /* ════════════════════════════════
    Playing state indicators
    ════════════════════════════════ */
-.is-playing .sel-time {
+.is-playing .time-display {
   border-color: var(--accent);
   box-shadow: 0 0 24px rgba(230,57,70,.15);
 }
@@ -184,17 +215,17 @@ html {
   align-items: center;
   justify-content: center;
   padding: 0 20px 24px;
-  gap: 20px;
+  gap: 18px;
   min-height: 0;
 }
 
 .now-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--text2);
   text-align: center;
   letter-spacing: -.2px;
-  min-height: 22px;
+  min-height: 24px;
 }
 
 /* ════════════════════════════════
@@ -209,7 +240,6 @@ html {
   max-width: 420px;
 }
 
-/* Shared button reset — NO flex-shrink:0 so buttons can shrink on narrow screens */
 .btn-block, .btn-seek, .btn-play {
   border: none;
   cursor: pointer;
@@ -226,7 +256,6 @@ html {
   opacity: .85;
 }
 
-/* ── Block skip ── */
 .btn-block {
   width: 52px;
   border-radius: 50%;
@@ -235,7 +264,6 @@ html {
 }
 .btn-block svg { width: 58%; height: 58%; }
 
-/* ── Seek 15s / 30s ── */
 .btn-seek {
   position: relative;
   width: 76px;
@@ -260,7 +288,6 @@ html {
   pointer-events: none;
 }
 
-/* ── Play / Pause ── */
 .btn-play {
   width: 92px;
   border-radius: 50%;
@@ -271,7 +298,6 @@ html {
 }
 .btn-play svg { width: 50%; height: 50%; }
 
-/* Loading spinner */
 .spinner {
   display: none;
   width: 38px; height: 38px;
@@ -283,21 +309,26 @@ html {
 .btn-play.loading .spinner { display: block; }
 .btn-play.loading .play-icon { display: none; }
 
-/* ── +6 min button ── */
-.btn-fwd5 {
+/* ── Skip +6 / +7 min buttons ── */
+.skip-btns {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-skip {
   border: 1.5px solid var(--border);
-  border-radius: 999px;
-  background: transparent;
+  border-radius: 14px;
+  background: var(--surface);
   color: var(--text2);
-  font: 600 15px/1 inherit;
-  padding: 10px 24px;
+  font: 700 17px/1 inherit;
+  padding: 14px 28px;
   cursor: pointer;
   letter-spacing: -.2px;
   transition: all .15s;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
-.btn-fwd5:active {
+.btn-skip:active {
   transform: scale(.93);
   background: var(--elevated);
   color: var(--text);
@@ -313,11 +344,11 @@ html {
 }
 
 .prog-t {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
-  min-width: 42px;
+  min-width: 44px;
 }
 .prog-t:last-child { text-align: right; }
 
@@ -415,12 +446,8 @@ html {
   }
 
   .time-label { font-size: 11px; }
-
-  .sel-time {
-    font-size: 30px;
-    padding: 14px 44px 14px 16px;
-    max-width: 300px;
-  }
+  .time-display { font-size: 32px; padding: 14px 16px; }
+  .sel-time { max-width: 300px; }
 
   .player {
     padding: 8px 16px 12px;
@@ -435,7 +462,8 @@ html {
   .seek-label { font-size: 12px; }
   .btn-block { width: 38px; }
 
-  .btn-fwd5 { font-size: 13px; padding: 6px 18px; }
+  .skip-btns { gap: 8px; }
+  .btn-skip { font-size: 14px; padding: 8px 18px; border-radius: 10px; }
   .prog-t { font-size: 13px; min-width: 36px; }
   .prog { max-width: 360px; }
 }

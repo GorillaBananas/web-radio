@@ -10,7 +10,7 @@
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
   <title>ZB On Demand</title>
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 
@@ -28,9 +28,12 @@
   <!-- ── Hero: time selector ── -->
   <div class="time-hero">
     <label class="time-label">Select time block</label>
-    <select class="sel sel-time" id="timeSel">
-      <option value="" disabled selected>--:--</option>
-    </select>
+    <div class="time-wrap">
+      <div class="time-display" id="timeDisplay">7:00 am</div>
+      <select class="time-select-hidden" id="timeSel">
+        <option value="" disabled selected>--:--</option>
+      </select>
+    </div>
     <div class="now-sub" id="nowSub">15-minute blocks</div>
   </div>
 
@@ -64,7 +67,10 @@
       </button>
     </div>
 
-    <button class="btn-fwd5" id="btnFwd5m">+6 min</button>
+    <div class="skip-btns">
+      <button class="btn-skip" id="btnFwd6m">+6 min</button>
+      <button class="btn-skip" id="btnFwd7m">+7 min</button>
+    </div>
 
     <div class="prog">
       <span class="prog-t" id="timeCur">0:00</span>
@@ -82,6 +88,6 @@
 
 <div class="toast" id="toast"></div>
 <audio id="audio" preload="none"></audio>
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

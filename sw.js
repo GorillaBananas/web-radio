@@ -1,4 +1,4 @@
-var CACHE = 'zb-v8';
+var CACHE = 'zb-v9';
 var SHELL = ['/', '/index.html', '/style.css', '/app.js', '/manifest.json'];
 
 self.addEventListener('install', function(e) {

@@ -332,7 +332,7 @@ $('btnPrev').addEventListener('click', function() { skip(-1); });
 $('btnNext').addEventListener('click', function() { skip(1); });
 $('btnBack15').addEventListener('click', function() { seekBy(-15); });
 $('btnFwd30').addEventListener('click', function() { seekBy(30); });
-$('btnFwd6m').addEventListener('click', function() { seekBy(360); });
+$('btnFwd2m').addEventListener('click', function() { seekBy(120); });
 $('btnFwd7m').addEventListener('click', function() { seekBy(420); });
 
 // ── MediaSession (lock screen / CarPlay controls) ──

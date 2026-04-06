@@ -3,7 +3,20 @@ var REGIONS = ['auckland', 'wellington', 'christchurch'];
 var BLOCK_MIN = 15;
 var BPH = 60 / BLOCK_MIN;            // blocks per hour
 var TOTAL = 24 * BPH;                // 96 blocks/day
-var NZ_OFF = 13;                      // NZDT = UTC+13
+// NZ timezone: NZDT=UTC+13 (last Sun Sep – first Sun Apr), NZST=UTC+12
+function nzOffset(d) {
+  var y = d.getUTCFullYear();
+  // DST starts: last Sunday of September at 2am NZST (14:00 UTC)
+  var sep30 = new Date(Date.UTC(y, 8, 30));
+  var dstStart = new Date(Date.UTC(y, 8, 30 - sep30.getUTCDay(), 14, 0));
+  // DST ends: first Sunday of April at 3am NZDT (14:00 UTC)
+  var apr1 = new Date(Date.UTC(y, 3, 1));
+  var firstSunApr = apr1.getUTCDay() === 0 ? 1 : 8 - apr1.getUTCDay();
+  var dstEnd = new Date(Date.UTC(y, 3, firstSunApr, 14, 0));
+  // Between dstEnd and dstStart = NZST (UTC+12), otherwise NZDT (UTC+13)
+  if (d >= dstEnd && d < dstStart) return 12;
+  return 13;
+}
 var DEFAULT_BLOCK = 28;               // 7:00 am
 var MAX_RETRIES = 2;
 var DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -29,7 +42,8 @@ var appEl   = document.querySelector('.app');
 
 function nzNow() {
   var d = new Date();
-  return new Date(d.getTime() + (NZ_OFF * 60 + d.getTimezoneOffset()) * 60000);
+  var off = nzOffset(d);
+  return new Date(d.getTime() + (off * 60 + d.getTimezoneOffset()) * 60000);
 }
 
 function nzDate(ago) {

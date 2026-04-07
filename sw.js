@@ -1,4 +1,4 @@
-var CACHE = 'zb-v13';
+var CACHE = 'zb-v14';
 
 self.addEventListener('install', function() {
   // Take over immediately — don't wait for old tabs to close
@@ -20,8 +20,15 @@ self.addEventListener('activate', function(e) {
 self.addEventListener('fetch', function(e) {
   var url = new URL(e.request.url);
 
-  // Audio streams: always network, never cache
-  if (url.hostname === 'weekondemand.newstalkzb.co.nz') return;
+  // Audio streams: re-fetch via SW so browser sends Sec-Fetch-Dest: empty
+  // instead of Sec-Fetch-Dest: audio, bypassing NewstalkZB's hotlink block.
+  if (url.hostname === 'weekondemand.newstalkzb.co.nz') {
+    e.respondWith(
+      fetch(e.request.url, { mode: 'no-cors', referrerPolicy: 'no-referrer' })
+        .catch(function() { return new Response('', { status: 503 }); })
+    );
+    return;
+  }
 
   // Everything else: network-first, cache fallback (offline support)
   e.respondWith(

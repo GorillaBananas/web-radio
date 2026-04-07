@@ -1,4 +1,4 @@
-var CACHE = 'zb-v11';
+var CACHE = 'zb-v12';
 
 self.addEventListener('install', function() {
   // Take over immediately — don't wait for old tabs to close

@@ -2,8 +2,8 @@ name: Check ZB on-demand URLs
 
 on:
   schedule:
-    # Daily at 21:00 UTC = 09:00 NZST (or 10:00 NZDT)
-    - cron: '0 21 * * *'
+    # Every 2 days at 21:00 UTC = 09:00 NZST (or 10:00 NZDT)
+    - cron: '0 21 */2 * *'
   workflow_dispatch:  # allow manual run from Actions tab
 
 jobs:
@@ -15,19 +15,21 @@ jobs:
           # NOTE: deliberately no `set -e` — we want to run every check even
           # if curl times out on one of them, so the log shows the full picture.
 
-          # Use yesterday's date in NZ to avoid same-day publishing lag
           DATE=$(TZ='Pacific/Auckland' date -d 'yesterday' +%Y.%m.%d)
           echo "Checking blocks for NZ date: $DATE"
+          echo
 
           REGIONS="auckland wellington christchurch"
           BLOCKS="07.00.00 12.00.00 17.00.00"
-          FAIL=0
 
-          # Try a single URL with one retry on timeout. Echoes the result line
-          # and sets FAIL=1 on the outer scope if the URL is not 200/206.
+          # Counters for the failure summary
+          FAIL_404=0
+          FAIL_TIMEOUT=0
+          FAIL_OTHER=0
+          FAIL_LIST=""
+
           check_url() {
-            local URL="$1"
-            local CODE
+            URL="$1"
             for ATTEMPT in 1 2; do
               CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
                 -H 'Range: bytes=0-1023' \
@@ -36,16 +38,20 @@ jobs:
                 echo "OK   $CODE  $URL"
                 return 0
               fi
-              # 000 means curl itself errored (timeout, DNS, etc.) — retry once
               if [ "$CODE" = "000" ] && [ "$ATTEMPT" = "1" ]; then
-                echo "RETRY      $URL (curl error, attempting again)"
+                echo "RETRY      $URL"
                 sleep 2
                 continue
               fi
               break
             done
             echo "FAIL $CODE  $URL"
-            FAIL=1
+            FAIL_LIST="${FAIL_LIST}- \`$CODE\` ${URL}\n"
+            case "$CODE" in
+              404) FAIL_404=$((FAIL_404 + 1)) ;;
+              000) FAIL_TIMEOUT=$((FAIL_TIMEOUT + 1)) ;;
+              *)   FAIL_OTHER=$((FAIL_OTHER + 1)) ;;
+            esac
           }
 
           for REGION in $REGIONS; do
@@ -54,7 +60,62 @@ jobs:
             done
           done
 
-          if [ "$FAIL" = "1" ]; then
-            echo "::error::One or more ZB on-demand URLs failed. The URL pattern may have changed again, or the server is unreachable."
-            exit 1
+          TOTAL_FAIL=$((FAIL_404 + FAIL_TIMEOUT + FAIL_OTHER))
+
+          # Always write a run summary visible on the workflow page
+          {
+            echo "# ZB on-demand URL check"
+            echo
+            echo "**Date checked (NZ):** $DATE"
+            echo "**URLs checked:** 9"
+            echo "**Failures:** $TOTAL_FAIL"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$TOTAL_FAIL" = "0" ]; then
+            echo "All 9 URLs OK." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
+
+          # Build a plain-English explanation of what's wrong
+          {
+            echo
+            echo "## What's wrong"
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$FAIL_404" -gt 0 ]; then
+            {
+              echo "**$FAIL_404 URL(s) returned 404 Not Found.** This usually means NewstalkZB changed their URL format again (like when they switched from \`-D.mp3\` to \`-S.mp3\`). The PWA's URL builder in \`app.js\` probably needs updating. Check the failing URLs against what newstalkzb.co.nz/on-demand/zb-on-demand/ is actually using now."
+              echo
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "$FAIL_TIMEOUT" -gt 0 ]; then
+            {
+              echo "**$FAIL_TIMEOUT URL(s) timed out (no response in 30s).** This usually means a transient network issue between the GitHub runner and NewstalkZB, not a real problem. If a re-run shows the same URLs failing, the server may be down or geo-blocking the runner."
+              echo
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "$FAIL_OTHER" -gt 0 ]; then
+            {
+              echo "**$FAIL_OTHER URL(s) returned an unexpected status code** (not 200, 206, or 404). This is unusual. Check the failing URLs below for the specific code — could be a server error (5xx), redirect (3xx), or a new auth requirement (401/403)."
+              echo
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          {
+            echo "## Failing URLs"
+            echo
+            printf '%b' "$FAIL_LIST"
+            echo
+            echo "## Next steps"
+            echo
+            echo "1. Open one of the failing URLs in a browser to see what the server returns."
+            echo "2. If it's a 404, find the working URL pattern at https://www.newstalkzb.co.nz/on-demand/zb-on-demand/ (DevTools Network tab while playing audio) and update \`buildUrl()\` in \`app.js\`."
+            echo "3. If it's a timeout, re-run this workflow once. If it fails again, the server may be down."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # Short error annotation that shows up in the email + Actions UI
+          echo "::error::$TOTAL_FAIL of 9 ZB URLs failed ($FAIL_404 not-found, $FAIL_TIMEOUT timeouts, $FAIL_OTHER other). See the run summary for details."
+          exit 1

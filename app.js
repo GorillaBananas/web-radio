@@ -89,7 +89,7 @@ function fmtSec(s) {
 function buildUrl() {
   var d = nzDate(S.day);
   return 'https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/' +
-    S.region + '/' + dotDate(d) + '-' + toUrl(S.block) + '-D.mp3';
+    S.region + '/' + dotDate(d) + '-' + toUrl(S.block) + '-S.mp3';
 }
 
 // ── Toast ──

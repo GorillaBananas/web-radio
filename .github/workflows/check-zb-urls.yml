@@ -1,0 +1,43 @@
+name: Check ZB on-demand URLs
+
+on:
+  schedule:
+    # Daily at 21:00 UTC = 09:00 NZST (or 10:00 NZDT)
+    - cron: '0 21 * * *'
+  workflow_dispatch:  # allow manual run from Actions tab
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check a few recent blocks
+        run: |
+          set -e
+          # Use yesterday's date in NZ to avoid same-day publishing lag
+          DATE=$(TZ='Pacific/Auckland' date -d 'yesterday' +%Y.%m.%d)
+          echo "Checking blocks for NZ date: $DATE"
+
+          REGIONS="auckland wellington christchurch"
+          BLOCKS="07.00.00 12.00.00 17.00.00"
+          FAIL=0
+
+          for REGION in $REGIONS; do
+            for BLOCK in $BLOCKS; do
+              URL="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/${REGION}/${DATE}-${BLOCK}-S.mp3"
+              # Use a Range request so the server returns 206 without streaming the whole file
+              CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
+                -H 'Range: bytes=0-1023' \
+                --max-time 15 "$URL")
+              if [ "$CODE" = "200" ] || [ "$CODE" = "206" ]; then
+                echo "OK   $CODE  $URL"
+              else
+                echo "FAIL $CODE  $URL"
+                FAIL=1
+              fi
+            done
+          done
+
+          if [ "$FAIL" = "1" ]; then
+            echo "::error::One or more ZB on-demand URLs failed. The URL pattern may have changed again."
+            exit 1
+          fi

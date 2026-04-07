@@ -12,7 +12,9 @@ jobs:
     steps:
       - name: Check a few recent blocks
         run: |
-          set -e
+          # NOTE: deliberately no `set -e` — we want to run every check even
+          # if curl times out on one of them, so the log shows the full picture.
+
           # Use yesterday's date in NZ to avoid same-day publishing lag
           DATE=$(TZ='Pacific/Auckland' date -d 'yesterday' +%Y.%m.%d)
           echo "Checking blocks for NZ date: $DATE"
@@ -21,23 +23,38 @@ jobs:
           BLOCKS="07.00.00 12.00.00 17.00.00"
           FAIL=0
 
-          for REGION in $REGIONS; do
-            for BLOCK in $BLOCKS; do
-              URL="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/${REGION}/${DATE}-${BLOCK}-S.mp3"
-              # Use a Range request so the server returns 206 without streaming the whole file
+          # Try a single URL with one retry on timeout. Echoes the result line
+          # and sets FAIL=1 on the outer scope if the URL is not 200/206.
+          check_url() {
+            local URL="$1"
+            local CODE
+            for ATTEMPT in 1 2; do
               CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
                 -H 'Range: bytes=0-1023' \
-                --max-time 15 "$URL")
+                --max-time 30 "$URL" 2>/dev/null || echo "000")
               if [ "$CODE" = "200" ] || [ "$CODE" = "206" ]; then
                 echo "OK   $CODE  $URL"
-              else
-                echo "FAIL $CODE  $URL"
-                FAIL=1
+                return 0
               fi
+              # 000 means curl itself errored (timeout, DNS, etc.) — retry once
+              if [ "$CODE" = "000" ] && [ "$ATTEMPT" = "1" ]; then
+                echo "RETRY      $URL (curl error, attempting again)"
+                sleep 2
+                continue
+              fi
+              break
+            done
+            echo "FAIL $CODE  $URL"
+            FAIL=1
+          }
+
+          for REGION in $REGIONS; do
+            for BLOCK in $BLOCKS; do
+              check_url "https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/${REGION}/${DATE}-${BLOCK}-S.mp3"
             done
           done
 
           if [ "$FAIL" = "1" ]; then
-            echo "::error::One or more ZB on-demand URLs failed. The URL pattern may have changed again."
+            echo "::error::One or more ZB on-demand URLs failed. The URL pattern may have changed again, or the server is unreachable."
             exit 1
           fi

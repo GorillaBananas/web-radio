@@ -1,6 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="96" fill="#0a0a0a"/>
-  <text x="256" y="220" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="140" font-weight="700" fill="#ffffff">ZB</text>
-  <text x="256" y="340" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="60" font-weight="500" fill="#e63946">ON DEMAND</text>
-  <rect x="120" y="370" width="272" height="4" rx="2" fill="#e63946" opacity="0.3"/>
+  <!-- broadcast arcs -->
+  <g stroke="#e63946" stroke-opacity=".35" stroke-width="12" stroke-linecap="round" fill="none">
+    <path d="M 418 157 A 185 185 0 0 1 418 335"/>
+    <path d="M 94 157 A 185 185 0 0 0 94 335"/>
+    <path d="M 445 143 A 215 215 0 0 1 445 349"/>
+    <path d="M 67 143 A 215 215 0 0 0 67 349"/>
+  </g>
+  <!-- roundel -->
+  <circle cx="256" cy="246" r="150" fill="#e63946"/>
+  <text x="256" y="188" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="26" font-weight="600" letter-spacing="6" fill="#ffffff">NEWSTALK</text>
+  <text x="256" y="316" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="140" font-weight="800" fill="#ffffff">ZB</text>
+  <text x="256" y="478" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="34" font-weight="600" letter-spacing="6" fill="#e63946">ON DEMAND</text>
 </svg>

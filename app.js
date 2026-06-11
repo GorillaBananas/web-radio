@@ -167,62 +167,27 @@ $('daySel').addEventListener('change', function(e) {
   updateNow();
 });
 
-// ── Custom time picker (bottom sheet) ──
-var sheetEl = $('timeSheet');
-var backdropEl = $('sheetBackdrop');
-
-function buildSheet() {
+// Time dropdown (hidden select — drives the visible time-display)
+function renderTime() {
+  var sel = $('timeSel');
   var lim = S.day === 0 ? availLimit() : TOTAL - 1;
-  $('sheetTitle').textContent = dayLabel(S.day) + ' — ' + cap(S.region);
-  var html = '';
-  for (var h = 0; h < 24; h++) {
-    if (h * BPH > lim) break;
-    var hr = h === 0 ? '12 am' : h < 12 ? h + ' am' : h === 12 ? '12 pm' : (h - 12) + ' pm';
-    html += '<div class="sheet-row"><div class="sheet-hr">' + hr + '</div>';
-    for (var i = 0; i < BPH; i++) {
-      var b = h * BPH + i;
-      html += '<button class="cell' + (b === S.block ? ' on' : '') + '"' +
-        (b > lim ? ' disabled' : '') + ' data-b="' + b + '">:' +
-        String(blkM(b)).padStart(2, '0') + '</button>';
-    }
-    html += '</div>';
+  var html = '<option value="" disabled>--:--</option>';
+  for (var b = 0; b <= lim; b++) {
+    html += '<option value="' + b + '"' +
+      (b === S.block ? ' selected' : '') + '>' + to12(b) + '</option>';
   }
-  if (!html) html = '<div class="sheet-empty">No blocks available yet today</div>';
-  $('sheetGrid').innerHTML = html;
+  sel.innerHTML = html;
+  if (S.block !== null && S.block <= lim) sel.value = S.block;
+  updateTimeDisplay();
 }
 
-function openSheet() {
-  buildSheet();
-  sheetEl.classList.add('open');
-  backdropEl.classList.add('open');
-  var on = $('sheetGrid').querySelector('.cell.on');
-  if (on) on.scrollIntoView({ block: 'center' });
-}
-
-function closeSheet() {
-  sheetEl.classList.remove('open');
-  backdropEl.classList.remove('open');
-}
-
-$('timeDisplay').addEventListener('click', openSheet);
-$('sheetClose').addEventListener('click', closeSheet);
-backdropEl.addEventListener('click', closeSheet);
-
-$('sheetGrid').addEventListener('click', function(e) {
-  var b = e.target.closest('.cell');
-  if (!b || b.disabled) return;
+$('timeSel').addEventListener('change', function(e) {
   _retryCount = 0;
   _waitingNext = false;
-  S.block = parseInt(b.dataset.b, 10);
-  closeSheet();
+  S.block = parseInt(e.target.value, 10);
   updateTimeDisplay();
   play();
 });
-
-function renderTime() {
-  updateTimeDisplay();
-  if (sheetEl.classList.contains('open')) buildSheet();
-}
 
 // ── Time display sync ──
 function updateTimeDisplay() {
@@ -280,6 +245,7 @@ function skip(d) {
   }
   _waitingNext = false;
   S.block = next;
+  $('timeSel').value = next;
   updateTimeDisplay();
   play();
   return true;

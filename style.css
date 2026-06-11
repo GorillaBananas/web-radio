@@ -154,6 +154,12 @@ html {
 }
 
 .time-display {
+  display: block;
+  width: 100%;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   font-weight: 700;
   font-size: clamp(60px, 21vw, 92px);
   line-height: 1.05;
@@ -188,20 +194,7 @@ html {
   pointer-events: none;
 }
 
-/* Invisible select covers entire display — tapping opens native iOS picker */
-.time-select-hidden {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-  font-size: 16px;
-  -webkit-appearance: none;
-  appearance: none;
-  touch-action: manipulation;
-  border: none;
-}
+.time-display:active { opacity: .85; }
 
 .now-sub {
   font-size: 15px;
@@ -416,6 +409,111 @@ html {
 
 .prog-bar:active .prog-track,
 .prog-bar.scrubbing .prog-track { height: 10px; }
+
+/* ════════════════════════════════
+   Time picker bottom sheet
+   ════════════════════════════════ */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+  z-index: 100;
+}
+.sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 78vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 24px 24px 0 0;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  transform: translateY(100%);
+  transition: transform .3s cubic-bezier(.3, 1, .35, 1);
+  z-index: 101;
+}
+.sheet.open { transform: translateY(0); }
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 10px;
+  flex-shrink: 0;
+}
+.sheet-title { font-size: 17px; font-weight: 700; }
+.sheet-close {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: var(--elevated);
+  color: var(--text2);
+  font-size: 16px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.sheet-close:active { opacity: .7; }
+
+.sheet-grid {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 4px 16px 20px;
+}
+
+.sheet-row {
+  display: grid;
+  grid-template-columns: 58px repeat(4, 1fr);
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.sheet-hr {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text2);
+  text-align: right;
+  padding-right: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.cell {
+  padding: 14px 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--elevated);
+  color: var(--text);
+  font: 600 16px/1 inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.cell:active { opacity: .7; }
+.cell.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 2px 12px var(--glow);
+}
+.cell:disabled { opacity: .25; cursor: default; }
+
+.sheet-empty {
+  text-align: center;
+  color: var(--dim);
+  padding: 32px 0;
+  font-size: 15px;
+}
 
 /* ════════════════════════════════
    Toast

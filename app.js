@@ -7,6 +7,8 @@ var AVAIL_LAG_MIN = 2;               // a block appears on the server ~2 min aft
 var MORNING_BLOCK = 28;              // 7:00 am
 var DRIVE_BLOCK = 67;                // 4:45 pm
 var MAX_RETRIES = 2;
+var EDGE_RETRY_MS = 20000;           // at the live edge, retry the same block every 20s...
+var EDGE_RETRY_MAX = 9;              // ...for up to ~3 minutes
 var DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -18,7 +20,12 @@ var S = {
   playing: false,
   loading: false
 };
-var _retryCount = 0;
+var _retryCount = 0;   // transient-error retries for the current block
+var _edgeRetries = 0;  // not-yet-published retries at the live edge
+var _resumeAt = 0;     // position to restore after a stream reload
+var _waitingNext = false;
+var _autoTimer = null;
+var _lastWall = 0;     // wall-clock time of the last playback progress
 
 // ── DOM shortcuts ──
 function $(id) { return document.getElementById(id); }
@@ -160,26 +167,62 @@ $('daySel').addEventListener('change', function(e) {
   updateNow();
 });
 
-// Time dropdown (hidden select — drives the visible time-display)
-function renderTime() {
-  var sel = $('timeSel');
+// ── Custom time picker (bottom sheet) ──
+var sheetEl = $('timeSheet');
+var backdropEl = $('sheetBackdrop');
+
+function buildSheet() {
   var lim = S.day === 0 ? availLimit() : TOTAL - 1;
-  var html = '<option value="" disabled>--:--</option>';
-  for (var b = 0; b <= lim; b++) {
-    html += '<option value="' + b + '"' +
-      (b === S.block ? ' selected' : '') + '>' + to12(b) + '</option>';
+  $('sheetTitle').textContent = dayLabel(S.day) + ' — ' + cap(S.region);
+  var html = '';
+  for (var h = 0; h < 24; h++) {
+    if (h * BPH > lim) break;
+    var hr = h === 0 ? '12 am' : h < 12 ? h + ' am' : h === 12 ? '12 pm' : (h - 12) + ' pm';
+    html += '<div class="sheet-row"><div class="sheet-hr">' + hr + '</div>';
+    for (var i = 0; i < BPH; i++) {
+      var b = h * BPH + i;
+      html += '<button class="cell' + (b === S.block ? ' on' : '') + '"' +
+        (b > lim ? ' disabled' : '') + ' data-b="' + b + '">:' +
+        String(blkM(b)).padStart(2, '0') + '</button>';
+    }
+    html += '</div>';
   }
-  sel.innerHTML = html;
-  if (S.block !== null && S.block <= lim) sel.value = S.block;
-  updateTimeDisplay();
+  if (!html) html = '<div class="sheet-empty">No blocks available yet today</div>';
+  $('sheetGrid').innerHTML = html;
 }
 
-$('timeSel').addEventListener('change', function(e) {
+function openSheet() {
+  buildSheet();
+  sheetEl.classList.add('open');
+  backdropEl.classList.add('open');
+  var on = $('sheetGrid').querySelector('.cell.on');
+  if (on) on.scrollIntoView({ block: 'center' });
+}
+
+function closeSheet() {
+  sheetEl.classList.remove('open');
+  backdropEl.classList.remove('open');
+}
+
+$('timeDisplay').addEventListener('click', openSheet);
+$('sheetClose').addEventListener('click', closeSheet);
+backdropEl.addEventListener('click', closeSheet);
+
+$('sheetGrid').addEventListener('click', function(e) {
+  var b = e.target.closest('.cell');
+  if (!b || b.disabled) return;
   _retryCount = 0;
-  S.block = parseInt(e.target.value, 10);
+  _waitingNext = false;
+  S.block = parseInt(b.dataset.b, 10);
+  closeSheet();
   updateTimeDisplay();
   play();
 });
+
+function renderTime() {
+  updateTimeDisplay();
+  if (sheetEl.classList.contains('open')) buildSheet();
+}
 
 // ── Time display sync ──
 function updateTimeDisplay() {
@@ -219,28 +262,30 @@ function toggle() {
   }
 }
 
+// Returns true if it actually moved to another block
 function skip(d) {
-  if (S.block === null) return;
+  if (S.block === null) return false;
   var next = S.block + d;
   if (next < 0) {
     if (S.day < 6) { S.day++; next = TOTAL - 1; renderDays(); renderTime(); }
-    else return;
+    else return false;
   } else if (next >= TOTAL) {
     if (S.day > 0) { S.day--; next = 0; renderDays(); renderTime(); }
-    else { toast('You’re all caught up'); return; }
+    else { toast('You’re all caught up'); return false; }
   }
   var lim = S.day === 0 ? availLimit() : TOTAL - 1;
   if (next > lim) {
     if (d > 0) toast('You’re all caught up');
-    return;
+    return false;
   }
+  _waitingNext = false;
   S.block = next;
-  $('timeSel').value = next;
   updateTimeDisplay();
   play();
+  return true;
 }
 
-function userSkip(d) { _retryCount = 0; skip(d); }
+function userSkip(d) { _retryCount = 0; _waitingNext = false; skip(d); }
 
 // ── UI Updates ──
 
@@ -265,40 +310,100 @@ function updateUI() {
 
 // ── Audio Events ──
 
+// At the live edge = playing today's newest published block
+function liveEdge() {
+  return S.day === 0 && S.block !== null && S.block >= availLimit();
+}
+
 audio.addEventListener('playing', function() {
   _retryCount = 0;
+  _edgeRetries = 0;
   S.loading = false; S.playing = true; updateUI();
+  _lastWall = Date.now();
+  if (_resumeAt > 0) {
+    var t = _resumeAt;
+    _resumeAt = 0;
+    try { audio.currentTime = t; } catch (e) {}
+  }
   updatePositionState();
 });
 audio.addEventListener('pause', function() {
   S.playing = false; updateUI();
 });
 audio.addEventListener('ended', function() {
-  S.playing = false; updateUI(); skip(1);
+  S.playing = false; updateUI();
+  // Auto-advance; if the next block isn't published yet, wait for it
+  if (!skip(1)) armAutoAdvance();
 });
 audio.addEventListener('error', function() {
+  if (!audio.src) return;
   S.loading = false; S.playing = false;
   updateUI();
   if (_retryCount === 0) {
     // First failure may be a transient network blip \u2014 retry the same block
     _retryCount++;
     toast('Retrying\u2026');
-    setTimeout(play, 800);
-  } else if (_retryCount <= MAX_RETRIES) {
+    setTimeout(play, 1000);
+  } else if (liveEdge() && _edgeRetries < EDGE_RETRY_MAX) {
+    // The newest block sometimes takes longer than usual to publish \u2014
+    // keep retrying the same URL instead of skipping into nothing
+    _edgeRetries++;
+    toast('Waiting for broadcast\u2026');
+    setTimeout(play, EDGE_RETRY_MS);
+  } else if (!liveEdge() && _retryCount <= MAX_RETRIES) {
     _retryCount++;
     toast('Trying next block\u2026');
     setTimeout(function() { skip(1); }, 500);
   } else {
     _retryCount = 0;
+    _edgeRetries = 0;
     toast('Audio not available');
   }
 });
 audio.addEventListener('timeupdate', function() {
   if (!audio.duration) return;
+  _lastWall = Date.now();
   $('progFill').style.width = (audio.currentTime / audio.duration * 100) + '%';
   $('timeCur').textContent = fmtSec(audio.currentTime);
   $('timeTot').textContent = fmtSec(audio.duration);
 });
+
+// ── Stall watchdog ──
+// Catches the "looks like it's playing but nothing can be heard" state:
+// if the playback clock stops advancing for 10s while nominally playing,
+// reload the stream and resume from the same position.
+setInterval(function() {
+  if (!S.playing || audio.paused || !_lastWall) return;
+  if (Date.now() - _lastWall > 10000) {
+    _resumeAt = audio.currentTime;
+    _lastWall = Date.now();
+    toast('Reconnecting…');
+    play();
+  }
+}, 5000);
+
+// ── Auto-advance at the live edge ──
+// After today's newest block ends, the next one is only published ~2 min
+// after it finishes airing. Wait for that moment and resume automatically.
+function armAutoAdvance() {
+  if (S.day !== 0 || S.block === null || S.block + 1 >= TOTAL) return;
+  _waitingNext = true;
+  toast('Next block isn’t ready yet — will resume when it is');
+  clearTimeout(_autoTimer);
+  var n = nzNow();
+  var nowMin = n.getHours() * 60 + n.getMinutes() + n.getSeconds() / 60;
+  var publishMin = (S.block + 2) * BLOCK_MIN + AVAIL_LAG_MIN;
+  var waitMs = Math.max(5, (publishMin - nowMin) * 60 + 10) * 1000;
+  _autoTimer = setTimeout(tryAutoNext, waitMs);
+}
+
+function tryAutoNext() {
+  if (!_waitingNext || S.playing || S.loading) return;
+  if (!skip(1)) {
+    clearTimeout(_autoTimer);
+    _autoTimer = setTimeout(tryAutoNext, 30000);
+  }
+}
 
 // ── Seek by seconds ──
 function seekBy(secs) {
@@ -463,7 +568,10 @@ function refreshClock() {
 }
 
 document.addEventListener('visibilitychange', function() {
-  if (!document.hidden) refreshClock();
+  if (!document.hidden) {
+    refreshClock();
+    tryAutoNext();
+  }
 });
 window.addEventListener('pageshow', refreshClock);
 

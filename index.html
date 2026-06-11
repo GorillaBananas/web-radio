@@ -11,7 +11,7 @@
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
   <title>ZB On Demand</title>
-  <link rel="stylesheet" href="style.css?v=17">
+  <link rel="stylesheet" href="style.css?v=18">
 </head>
 <body>
 
@@ -37,7 +37,10 @@
   <div class="time-hero">
     <label class="time-label">Select time block</label>
     <div class="time-wrap">
-      <button class="time-display" id="timeDisplay" aria-haspopup="dialog">--:--</button>
+      <div class="time-display" id="timeDisplay">--:--</div>
+      <select class="time-select-hidden" id="timeSel">
+        <option value="" disabled selected>--:--</option>
+      </select>
     </div>
     <div class="now-sub" id="nowSub">15-minute blocks</div>
   </div>
@@ -94,17 +97,8 @@
 
 </div>
 
-<div class="sheet-backdrop" id="sheetBackdrop"></div>
-<div class="sheet" id="timeSheet" role="dialog" aria-label="Select time block">
-  <div class="sheet-head">
-    <div class="sheet-title" id="sheetTitle">Select time</div>
-    <button class="sheet-close" id="sheetClose" aria-label="Close">&#10005;</button>
-  </div>
-  <div class="sheet-grid" id="sheetGrid"></div>
-</div>
-
 <div class="toast" id="toast"></div>
 <audio id="audio" preload="none" referrerpolicy="no-referrer"></audio>
-<script src="app.js?v=17"></script>
+<script src="app.js?v=18"></script>
 </body>
 </html>

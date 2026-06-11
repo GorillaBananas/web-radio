@@ -3,21 +3,9 @@ var REGIONS = ['auckland', 'wellington', 'christchurch'];
 var BLOCK_MIN = 15;
 var BPH = 60 / BLOCK_MIN;            // blocks per hour
 var TOTAL = 24 * BPH;                // 96 blocks/day
-// NZ timezone: NZDT=UTC+13 (last Sun Sep – first Sun Apr), NZST=UTC+12
-function nzOffset(d) {
-  var y = d.getUTCFullYear();
-  // DST starts: last Sunday of September at 2am NZST (14:00 UTC)
-  var sep30 = new Date(Date.UTC(y, 8, 30));
-  var dstStart = new Date(Date.UTC(y, 8, 30 - sep30.getUTCDay(), 14, 0));
-  // DST ends: first Sunday of April at 3am NZDT (14:00 UTC)
-  var apr1 = new Date(Date.UTC(y, 3, 1));
-  var firstSunApr = apr1.getUTCDay() === 0 ? 1 : 8 - apr1.getUTCDay();
-  var dstEnd = new Date(Date.UTC(y, 3, firstSunApr, 14, 0));
-  // Between dstEnd and dstStart = NZST (UTC+12), otherwise NZDT (UTC+13)
-  if (d >= dstEnd && d < dstStart) return 12;
-  return 13;
-}
-var DEFAULT_BLOCK = 28;               // 7:00 am
+var AVAIL_LAG_MIN = 2;               // a block appears on the server ~2 min after it finishes airing
+var MORNING_BLOCK = 28;              // 7:00 am
+var DRIVE_BLOCK = 67;                // 4:45 pm
 var MAX_RETRIES = 2;
 var DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -40,10 +28,18 @@ var appEl   = document.querySelector('.app');
 
 // ── NZ time helpers ──
 
+// NZ wall-clock time via the platform timezone database (handles DST exactly)
+var NZ_FMT = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Pacific/Auckland',
+  year: 'numeric', month: '2-digit', day: '2-digit',
+  hour: '2-digit', minute: '2-digit', second: '2-digit',
+  hour12: false
+});
+
 function nzNow() {
-  var d = new Date();
-  var off = nzOffset(d);
-  return new Date(d.getTime() + (off * 60 + d.getTimezoneOffset()) * 60000);
+  var p = {};
+  NZ_FMT.formatToParts(new Date()).forEach(function(x) { p[x.type] = x.value; });
+  return new Date(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
 }
 
 function nzDate(ago) {
@@ -74,9 +70,26 @@ function toUrl(b) {
          String(blkM(b)).padStart(2,'0') + '.00';
 }
 
-function maxBlock() {
+// Latest block of today that has finished airing and had time to appear
+// on the server. Negative just after midnight (nothing from today yet).
+function availLimit() {
   var n = nzNow();
-  return n.getHours() * BPH + Math.floor(n.getMinutes() / BLOCK_MIN);
+  var mins = n.getHours() * 60 + n.getMinutes();
+  return Math.floor((mins - AVAIL_LAG_MIN) / BLOCK_MIN) - 1;
+}
+
+// Default selection:
+//  - after ~5:02pm (4:45pm block available): 4:45pm drive block
+//  - after ~7:17am (7:00am block available): 7:00am breakfast block
+//  - earlier in the morning: latest available block
+//  - just after midnight (nothing from today): yesterday's 11:45pm block
+function applyDefault() {
+  var avail = availLimit();
+  S.day = 0;
+  if (avail >= DRIVE_BLOCK) S.block = DRIVE_BLOCK;
+  else if (avail >= MORNING_BLOCK) S.block = MORNING_BLOCK;
+  else if (avail >= 0) S.block = avail;
+  else { S.day = 1; S.block = TOTAL - 1; }
 }
 
 function cap(r) { return r[0].toUpperCase() + r.slice(1); }
@@ -117,6 +130,7 @@ function renderRegion() {
 $('regionSeg').addEventListener('click', function(e) {
   var b = e.target.closest('button');
   if (!b) return;
+  _retryCount = 0;
   S.region = b.dataset.r;
   localStorage.setItem('zb_region', S.region);
   renderRegion();
@@ -125,14 +139,17 @@ $('regionSeg').addEventListener('click', function(e) {
 });
 
 // Day dropdown
+function dayLabel(i) {
+  var d = nzDate(i);
+  return i === 0 ? 'Today' : i === 1 ? 'Yesterday' :
+    DAYS_SHORT[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
+}
+
 function renderDays() {
   var sel = $('daySel');
   var html = '';
   for (var i = 0; i < 7; i++) {
-    var d = nzDate(i);
-    var lbl = i === 0 ? 'Today' : i === 1 ? 'Yesterday' :
-      DAYS_SHORT[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
-    html += '<option value="' + i + '"' + (i === S.day ? ' selected' : '') + '>' + lbl + '</option>';
+    html += '<option value="' + i + '"' + (i === S.day ? ' selected' : '') + '>' + dayLabel(i) + '</option>';
   }
   sel.innerHTML = html;
 }
@@ -146,7 +163,7 @@ $('daySel').addEventListener('change', function(e) {
 // Time dropdown (hidden select — drives the visible time-display)
 function renderTime() {
   var sel = $('timeSel');
-  var lim = S.day === 0 ? maxBlock() : TOTAL - 1;
+  var lim = S.day === 0 ? availLimit() : TOTAL - 1;
   var html = '<option value="" disabled>--:--</option>';
   for (var b = 0; b <= lim; b++) {
     html += '<option value="' + b + '"' +
@@ -158,6 +175,7 @@ function renderTime() {
 }
 
 $('timeSel').addEventListener('change', function(e) {
+  _retryCount = 0;
   S.block = parseInt(e.target.value, 10);
   updateTimeDisplay();
   play();
@@ -169,7 +187,8 @@ function updateTimeDisplay() {
   if (S.block === null) {
     el.textContent = '--:--';
   } else {
-    el.textContent = to12(S.block);
+    var t = to12(S.block).split(' ');
+    el.innerHTML = t[0] + '<span class="ampm">' + t[1] + '</span>';
   }
 }
 
@@ -208,15 +227,20 @@ function skip(d) {
     else return;
   } else if (next >= TOTAL) {
     if (S.day > 0) { S.day--; next = 0; renderDays(); renderTime(); }
-    else return;
+    else { toast('You’re all caught up'); return; }
   }
-  var lim = S.day === 0 ? maxBlock() : TOTAL - 1;
-  if (next > lim) return;
+  var lim = S.day === 0 ? availLimit() : TOTAL - 1;
+  if (next > lim) {
+    if (d > 0) toast('You’re all caught up');
+    return;
+  }
   S.block = next;
   $('timeSel').value = next;
   updateTimeDisplay();
   play();
 }
+
+function userSkip(d) { _retryCount = 0; skip(d); }
 
 // ── UI Updates ──
 
@@ -225,10 +249,7 @@ function updateNow() {
     $('nowTitle').textContent = '';
     return;
   }
-  var d = nzDate(S.day);
-  var dayLbl = S.day === 0 ? 'Today' : S.day === 1 ? 'Yesterday' :
-    DAYS_SHORT[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
-  $('nowTitle').textContent = cap(S.region) + ' \u2014 ' + dayLbl;
+  $('nowTitle').textContent = cap(S.region) + ' \u2014 ' + dayLabel(S.day);
 }
 
 function updateUI() {
@@ -258,7 +279,12 @@ audio.addEventListener('ended', function() {
 audio.addEventListener('error', function() {
   S.loading = false; S.playing = false;
   updateUI();
-  if (_retryCount < MAX_RETRIES) {
+  if (_retryCount === 0) {
+    // First failure may be a transient network blip \u2014 retry the same block
+    _retryCount++;
+    toast('Retrying\u2026');
+    setTimeout(play, 800);
+  } else if (_retryCount <= MAX_RETRIES) {
     _retryCount++;
     toast('Trying next block\u2026');
     setTimeout(function() { skip(1); }, 500);
@@ -342,12 +368,48 @@ document.addEventListener('mouseup', function() { if (scrubbing) scrubEnd(); });
 
 // ── Buttons ──
 btnPlay.addEventListener('click', toggle);
-$('btnPrev').addEventListener('click', function() { skip(-1); });
-$('btnNext').addEventListener('click', function() { skip(1); });
+$('btnPrev').addEventListener('click', function() { userSkip(-1); });
+$('btnNext').addEventListener('click', function() { userSkip(1); });
 $('btnBack15').addEventListener('click', function() { seekBy(-15); });
 $('btnFwd30').addEventListener('click', function() { seekBy(30); });
 $('btnFwd2m').addEventListener('click', function() { seekBy(120); });
 $('btnFwd7m').addEventListener('click', function() { seekBy(420); });
+
+// ── Lock-screen artwork: ZB roundel drawn once on a canvas ──
+var _artUrl = null;
+(function() {
+  try {
+    var c = document.createElement('canvas');
+    c.width = c.height = 512;
+    var x = c.getContext('2d');
+    x.fillStyle = '#0a0a0a';
+    x.fillRect(0, 0, 512, 512);
+    // broadcast arcs either side of the roundel
+    x.strokeStyle = 'rgba(230,57,70,.35)';
+    x.lineWidth = 12;
+    x.lineCap = 'round';
+    [185, 215].forEach(function(r) {
+      x.beginPath(); x.arc(256, 246, r, -0.5, 0.5); x.stroke();
+      x.beginPath(); x.arc(256, 246, r, Math.PI - 0.5, Math.PI + 0.5); x.stroke();
+    });
+    // red roundel
+    x.fillStyle = '#e63946';
+    x.beginPath(); x.arc(256, 246, 150, 0, 2 * Math.PI); x.fill();
+    x.textAlign = 'center';
+    x.textBaseline = 'middle';
+    x.fillStyle = '#fff';
+    x.font = '600 26px -apple-system, system-ui, sans-serif';
+    x.fillText('N E W S T A L K', 256, 178);
+    x.font = '800 140px -apple-system, system-ui, sans-serif';
+    x.fillText('ZB', 256, 268);
+    x.fillStyle = '#e63946';
+    x.font = '600 34px -apple-system, system-ui, sans-serif';
+    x.fillText('O N   D E M A N D', 256, 466);
+    c.toBlob(function(b) {
+      if (b) _artUrl = URL.createObjectURL(b);
+    }, 'image/png');
+  } catch (e) {}
+})();
 
 // ── MediaSession (lock screen / CarPlay controls) ──
 if ('mediaSession' in navigator) {
@@ -358,30 +420,56 @@ if ('mediaSession' in navigator) {
   // Always seek our amounts regardless of system-suggested offset
   navigator.mediaSession.setActionHandler('seekforward', function() { seekBy(30); });
   navigator.mediaSession.setActionHandler('seekbackward', function() { seekBy(-15); });
+  // Lock-screen scrubber
+  try {
+    navigator.mediaSession.setActionHandler('seekto', function(d) {
+      if (d.fastSeek && 'fastSeek' in audio) { audio.fastSeek(d.seekTime); return; }
+      audio.currentTime = d.seekTime;
+      updatePositionState();
+    });
+  } catch (e) {}
   audio.addEventListener('playing', function() {
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: to12(S.block) + ' \u2014 ' + cap(S.region),
-      artist: 'Newstalk ZB',
-      album: 'Week on Demand'
+      title: to12(S.block) + ' \u2014 ' + dayLabel(S.day),
+      artist: 'Newstalk ZB ' + cap(S.region),
+      album: 'Week on Demand',
+      artwork: _artUrl
+        ? [{ src: _artUrl, sizes: '512x512', type: 'image/png' }]
+        : [{ src: 'icon.svg', sizes: '512x512', type: 'image/svg+xml' }]
     });
   });
 }
 
 // ── Keyboard ──
 document.addEventListener('keydown', function(e) {
+  // Don't hijack keys while a control (e.g. the day select) has focus
+  if (e.target.closest && e.target.closest('select, button, input')) return;
   if (e.code === 'Space') { e.preventDefault(); toggle(); }
-  if (e.code === 'ArrowLeft') skip(-1);
-  if (e.code === 'ArrowRight') skip(1);
+  if (e.code === 'ArrowLeft') userSkip(-1);
+  if (e.code === 'ArrowRight') userSkip(1);
 });
+
+// ── Keep "Today" fresh ──
+// If the PWA sits open (common on iOS), the day labels and today's block list
+// go stale. Re-render whenever the app comes back to the foreground.
+var _clockKey = '';
+function refreshClock() {
+  var key = dotDate(nzDate(0)) + ':' + availLimit();
+  if (key === _clockKey) return;
+  _clockKey = key;
+  renderDays();
+  renderTime();
+  updateNow();
+}
+
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) refreshClock();
+});
+window.addEventListener('pageshow', refreshClock);
 
 // ── Init ──
 
-// Default to 7:00 am — if today hasn't reached 7am NZ time, use yesterday
-S.block = DEFAULT_BLOCK;
-if (S.day === 0 && maxBlock() < DEFAULT_BLOCK) {
-  S.day = 1;
-}
-
+applyDefault();
 renderRegion();
 renderDays();
 renderTime();

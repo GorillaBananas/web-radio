@@ -25,7 +25,9 @@ var _edgeRetries = 0;  // not-yet-published retries at the live edge
 var _resumeAt = 0;     // position to restore after a stream reload
 var _waitingNext = false;
 var _autoTimer = null;
-var _lastWall = 0;     // wall-clock time of the last playback progress
+var _availTimer = null;
+var _availKey = '';    // date + newest available block, to skip no-op refreshes
+var _availDate = '';   // NZ date the app currently thinks "today" is
 
 // ── DOM shortcuts ──
 function $(id) { return document.getElementById(id); }
@@ -181,6 +183,21 @@ function renderTime() {
   updateTimeDisplay();
 }
 
+// Today's list only ever grows, so append rather than rewriting innerHTML:
+// a full rebuild can dismiss the native picker if it happens while it's open.
+function growTimeOptions(lim) {
+  var sel = $('timeSel');
+  var next = sel.options.length - 1;   // minus the '--:--' placeholder
+  if (next > lim + 1) return;          // longer than it should be; leave to renderTime()
+  for (var b = next; b <= lim; b++) {
+    var o = document.createElement('option');
+    o.value = b;
+    o.textContent = to12(b);
+    sel.appendChild(o);
+  }
+  if (S.block !== null && S.block <= lim) sel.value = S.block;
+}
+
 $('timeSel').addEventListener('change', function(e) {
   _retryCount = 0;
   _waitingNext = false;
@@ -213,7 +230,9 @@ function play() {
   audio.load();
   audio.play().catch(function() {
     S.loading = false;
-    toast('Playback failed');
+    // A rejection with no media error is the autoplay policy (an auto-advance
+    // fired without a user gesture), not a bad file.
+    toast(audio.error ? 'Playback failed' : 'Tap play to continue');
     updateUI();
   });
 }
@@ -221,6 +240,7 @@ function play() {
 function toggle() {
   if (S.block === null) { toast('Pick a time first'); return; }
   if (audio.paused) {
+    _waitingNext = false;   // a manual play takes over from a pending auto-advance
     if (!audio.src) play(); else audio.play();
   } else {
     audio.pause();
@@ -255,7 +275,23 @@ function userSkip(d) { _retryCount = 0; _waitingNext = false; skip(d); }
 
 // ── UI Updates ──
 
+// Sub-label under the clock: newest block available right now, tappable to
+// catch up to it.
+function updateSub() {
+  var el = $('nowSub');
+  var lim = availLimit();
+  if (lim < 0) {                      // just after midnight, nothing from today
+    el.textContent = '15-minute blocks';
+    el.classList.remove('tap');
+    return;
+  }
+  var atLatest = (S.day === 0 && S.block === lim);
+  el.textContent = atLatest ? 'Latest block' : 'Latest: ' + to12(lim);
+  el.classList.toggle('tap', !atLatest);
+}
+
 function updateNow() {
+  updateSub();
   if (S.block === null) {
     $('nowTitle').textContent = '';
     return;
@@ -285,7 +321,6 @@ audio.addEventListener('playing', function() {
   _retryCount = 0;
   _edgeRetries = 0;
   S.loading = false; S.playing = true; updateUI();
-  _lastWall = Date.now();
   if (_resumeAt > 0) {
     var t = _resumeAt;
     _resumeAt = 0;
@@ -328,21 +363,24 @@ audio.addEventListener('error', function() {
 });
 audio.addEventListener('timeupdate', function() {
   if (!audio.duration) return;
-  _lastWall = Date.now();
   $('progFill').style.width = (audio.currentTime / audio.duration * 100) + '%';
   $('timeCur').textContent = fmtSec(audio.currentTime);
   $('timeTot').textContent = fmtSec(audio.duration);
 });
 
 // ── Stall watchdog ──
-// Catches the "looks like it's playing but nothing can be heard" state:
-// if the playback clock stops advancing for 10s while nominally playing,
-// reload the stream and resume from the same position.
+// Catches the "looks like it's playing but nothing can be heard" state.
+// Tracks the playback position rather than wall-clock time: iOS suspends the
+// page's timers while backgrounded even though audio keeps playing, so a pure
+// wall-clock check reloaded healthy playback every time the app came back.
+var _wdPos = -1, _wdSince = 0;
 setInterval(function() {
-  if (!S.playing || audio.paused || !_lastWall) return;
-  if (Date.now() - _lastWall > 10000) {
-    _resumeAt = audio.currentTime;
-    _lastWall = Date.now();
+  if (!S.playing || audio.paused) { _wdPos = -1; _wdSince = 0; return; }
+  var p = audio.currentTime;
+  if (_wdPos < 0 || p > _wdPos + 0.25) { _wdPos = p; _wdSince = Date.now(); return; }
+  if (Date.now() - _wdSince > 12000) {
+    _resumeAt = p;
+    _wdPos = -1; _wdSince = 0;
     toast('Reconnecting…');
     play();
   }
@@ -364,11 +402,15 @@ function armAutoAdvance() {
 }
 
 function tryAutoNext() {
-  if (!_waitingNext || S.playing || S.loading) return;
-  if (!skip(1)) {
-    clearTimeout(_autoTimer);
+  if (!_waitingNext) return;
+  // Always leave a timer armed while waiting — an early return here used to
+  // break the chain permanently, so auto-advance died until the next relaunch.
+  clearTimeout(_autoTimer);
+  if (S.playing || S.loading) {
     _autoTimer = setTimeout(tryAutoNext, 30000);
+    return;
   }
+  if (!skip(1)) _autoTimer = setTimeout(tryAutoNext, 30000);
 }
 
 // ── Seek by seconds ──
@@ -514,32 +556,82 @@ if ('mediaSession' in navigator) {
 // ── Keyboard ──
 document.addEventListener('keydown', function(e) {
   // Don't hijack keys while a control (e.g. the day select) has focus
-  if (e.target.closest && e.target.closest('select, button, input')) return;
+  if (e.target.closest && e.target.closest('select, button, input, [role="button"]')) return;
   if (e.code === 'Space') { e.preventDefault(); toggle(); }
   if (e.code === 'ArrowLeft') userSkip(-1);
   if (e.code === 'ArrowRight') userSkip(1);
 });
 
-// ── Keep "Today" fresh ──
-// If the PWA sits open (common on iOS), the day labels and today's block list
-// go stale. Re-render whenever the app comes back to the foreground.
-var _clockKey = '';
-function refreshClock() {
-  var key = dotDate(nzDate(0)) + ':' + availLimit();
-  if (key === _clockKey) return;
-  _clockKey = key;
-  renderDays();
-  renderTime();
+// ══════════════════════════
+// AVAILABILITY REFRESH
+// ══════════════════════════
+// Which blocks exist is derived from the NZ clock, but nothing recomputed it
+// while the app sat open, so a block published mid-session never appeared
+// until the PWA was relaunched. Poll for the boundary moving.
+
+// A native <select> picker is open when its element holds focus. Rebuilding
+// its options then can dismiss or corrupt the iOS picker, so defer instead.
+function pickerOpen() {
+  return document.activeElement === $('timeSel') ||
+         document.activeElement === $('daySel');
+}
+
+function refreshAvail() {
+  var today = dotDate(nzDate(0));
+  var lim = availLimit();
+  var key = today + ':' + lim;
+  if (key === _availKey) return;
+  if (pickerOpen()) return;   // key not consumed — retried on the next tick
+  _availKey = key;
+
+  if (_availDate && _availDate !== today) {
+    // Midnight rolled over: day offsets now point one day further back, so
+    // bump S.day to keep the listener on the same actual calendar date.
+    if (S.day < 6) S.day++;
+    _availDate = today;
+    renderDays();
+    renderTime();
+    updateNow();
+    return;
+  }
+  _availDate = today;
+
+  if (S.day === 0) growTimeOptions(lim);
   updateNow();
 }
 
-document.addEventListener('visibilitychange', function() {
-  if (!document.hidden) {
-    refreshClock();
-    tryAutoNext();
-  }
+function availTick() {
+  refreshAvail();
+  if (_waitingNext) tryAutoNext();
+}
+
+// Catch up to the newest available block
+$('nowSub').addEventListener('keydown', function(e) {
+  if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); this.click(); }
 });
-window.addEventListener('pageshow', refreshClock);
+
+$('nowSub').addEventListener('click', function() {
+  var lim = availLimit();
+  if (lim < 0 || (S.day === 0 && S.block === lim)) return;
+  _retryCount = 0;
+  _edgeRetries = 0;
+  _waitingNext = false;
+  if (S.day !== 0) { S.day = 0; renderDays(); renderTime(); }
+  S.block = lim;
+  $('timeSel').value = lim;
+  updateTimeDisplay();
+  updateNow();
+  play();
+});
+
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) availTick();
+});
+window.addEventListener('pageshow', refreshAvail);
+
+// Flush a refresh deferred by pickerOpen() as soon as the picker closes
+$('timeSel').addEventListener('blur', refreshAvail);
+$('daySel').addEventListener('blur', refreshAvail);
 
 // ── Init ──
 
@@ -548,6 +640,8 @@ renderRegion();
 renderDays();
 renderTime();
 updateUI();
+refreshAvail();
+_availTimer = setInterval(availTick, 30000);
 
 if ('serviceWorker' in navigator) {
   // updateViaCache:'none' — always fetch sw.js from network, never HTTP cache

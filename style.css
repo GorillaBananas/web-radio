@@ -206,7 +206,20 @@ html {
 .now-sub {
   font-size: 15px;
   color: var(--dim);
+  padding: 6px 12px;
 }
+
+/* Tappable when a newer block than the selected one is available */
+.now-sub.tap {
+  color: var(--text2);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 4px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.now-sub.tap:active { opacity: .6; }
 
 /* ════════════════════════════════
    Playing state indicators

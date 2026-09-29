@@ -1,0 +1,60 @@
+# Health check for the endpoints the PWA depends on.
+#
+# Replaces check-zb-urls.yml, which GitHub auto-disabled on 2026-08-11 after 60
+# days of repo inactivity and which could not be re-enabled via the API. A new
+# filename means a new workflow, so this one starts enabled. The keep-alive step
+# below stops the same thing happening again.
+name: ZB health
+
+on:
+  schedule:
+    # 20:10 UTC = 09:10 NZDT / 08:10 NZST — after breakfast has finished airing,
+    # so the live-edge probe has something real to look at.
+    - cron: '10 20 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write     # needed only by the keep-alive commit
+
+concurrency:
+  group: zb-health
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Probe the endpoints
+        id: probe
+        run: bash .github/scripts/zb-health.sh
+
+      # Scheduled workflows are switched off in repos with no activity for 60
+      # days. Commit the status when it changes, or once a month regardless, so
+      # the repo never goes quiet long enough for that to happen again.
+      - name: Keep-alive
+        if: always()
+        run: |
+          set -euo pipefail
+          STATUS='${{ steps.probe.outputs.status }}'
+          [ -n "$STATUS" ] || STATUS='unknown'
+          LINE="$(date -u +%Y-%m-%d) ${STATUS}"
+
+          PREV_STATUS=$(awk 'NR==3{print $2}' ZB-HEALTH.md 2>/dev/null || echo '')
+          LAST_COMMIT=$(git log -1 --format=%ct -- ZB-HEALTH.md 2>/dev/null || echo 0)
+          AGE_DAYS=$(( ( $(date -u +%s) - LAST_COMMIT ) / 86400 ))
+
+          if [ "$STATUS" = "$PREV_STATUS" ] && [ "$AGE_DAYS" -lt 30 ]; then
+            echo "status unchanged ($STATUS) and last write was ${AGE_DAYS}d ago — nothing to commit"
+            exit 0
+          fi
+
+          { echo "# ZB endpoint health"; echo; echo "$LINE"; } > ZB-HEALTH.md
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ZB-HEALTH.md
+          git diff --staged --quiet && { echo 'no change'; exit 0; }
+          git commit -m "chore: ZB endpoint health — ${STATUS}"
+          git push

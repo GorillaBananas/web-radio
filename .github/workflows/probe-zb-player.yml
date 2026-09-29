@@ -34,3 +34,18 @@ jobs:
 
       - name: Probe the player
         run: node scripts/probe-zb-player.js
+
+      - name: Verify the suffix/date matrix
+        run: |
+          echo "date        suffix  status"
+          for D in $(TZ='Pacific/Auckland' date -d '4 days ago' +%Y.%m.%d) \
+                   $(TZ='Pacific/Auckland' date -d '3 days ago' +%Y.%m.%d) \
+                   $(TZ='Pacific/Auckland' date -d '2 days ago' +%Y.%m.%d) \
+                   $(TZ='Pacific/Auckland' date -d 'yesterday'  +%Y.%m.%d) \
+                   $(TZ='Pacific/Auckland' date               +%Y.%m.%d); do
+            for SFX in D S; do
+              U="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/${D}-07.00.00-${SFX}.mp3"
+              CODE=$(curl -s -o /dev/null -r 0-1023 --max-time 25 -w '%{http_code}' "$U" || echo 000)
+              printf '%s  -%s      %s\n' "$D" "$SFX" "$CODE"
+            done
+          done

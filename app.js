@@ -9,6 +9,10 @@ var DRIVE_BLOCK = 67;                // 4:45 pm
 var MAX_RETRIES = 2;
 var EDGE_RETRY_MS = 20000;           // at the live edge, retry the same block every 20s...
 var EDGE_RETRY_MAX = 9;              // ...for up to ~3 minutes
+// Upstream has flipped this suffix twice (-D, then -S in Apr 2026, back to -D
+// at the Sep 2026 cutover). Try each in turn and remember what worked, so the
+// next flip costs nothing.
+var SUFFIXES = ['D', 'S'];
 var DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -28,6 +32,12 @@ var _autoTimer = null;
 var _availTimer = null;
 var _availKey = '';    // date + newest available block, to skip no-op refreshes
 var _availDate = '';   // NZ date the app currently thinks "today" is
+var _failStreak = 0;   // distinct blocks that have failed back to back
+var _failFrom = null;  // block the user actually chose, to restore after a failure
+var _dayStepped = 0;   // days fallen back looking for one that still has audio
+var _suffixIdx = Math.max(0, SUFFIXES.indexOf(localStorage.getItem('zb_suffix') || 'D'));
+var _suffixTried = false;  // already tried the alternative naming for this block
+var _suffixBase = 0;       // naming to fall back to if the alternative fails too
 
 // ── DOM shortcuts ──
 function $(id) { return document.getElementById(id); }
@@ -111,7 +121,8 @@ function fmtSec(s) {
 function buildUrl() {
   var d = nzDate(S.day);
   return 'https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/' +
-    S.region + '/' + dotDate(d) + '-' + toUrl(S.block) + '-S.mp3';
+    S.region + '/' + dotDate(d) + '-' + toUrl(S.block) +
+    '-' + SUFFIXES[_suffixIdx] + '.mp3';
 }
 
 // ── Toast ──
@@ -164,6 +175,11 @@ function renderDays() {
 }
 
 $('daySel').addEventListener('change', function(e) {
+  _retryCount = 0;
+  _failStreak = 0;
+  _failFrom = null;
+  _dayStepped = 0;
+  _suffixTried = false;
   S.day = parseInt(e.target.value, 10);
   renderTime();
   updateNow();
@@ -200,6 +216,10 @@ function growTimeOptions(lim) {
 
 $('timeSel').addEventListener('change', function(e) {
   _retryCount = 0;
+  _failStreak = 0;
+  _failFrom = null;
+  _dayStepped = 0;
+  _suffixTried = false;
   _waitingNext = false;
   S.block = parseInt(e.target.value, 10);
   updateTimeDisplay();
@@ -230,9 +250,9 @@ function play() {
   audio.load();
   audio.play().catch(function() {
     S.loading = false;
-    // A rejection with no media error is the autoplay policy (an auto-advance
-    // fired without a user gesture), not a bad file.
-    toast(audio.error ? 'Playback failed' : 'Tap play to continue');
+    // If the media itself failed, the 'error' handler owns the recovery and the
+    // messaging — staying quiet here keeps its toasts from being talked over.
+    if (!audio.error) toast('Tap play to continue');
     updateUI();
   });
 }
@@ -264,6 +284,7 @@ function skip(d) {
     return false;
   }
   _waitingNext = false;
+  _suffixTried = false;
   S.block = next;
   $('timeSel').value = next;
   updateTimeDisplay();
@@ -271,7 +292,15 @@ function skip(d) {
   return true;
 }
 
-function userSkip(d) { _retryCount = 0; _waitingNext = false; skip(d); }
+function userSkip(d) {
+  _retryCount = 0;
+  _failStreak = 0;
+  _failFrom = null;
+  _dayStepped = 0;
+  _suffixTried = false;
+  _waitingNext = false;
+  skip(d);
+}
 
 // ── UI Updates ──
 
@@ -320,6 +349,12 @@ function liveEdge() {
 audio.addEventListener('playing', function() {
   _retryCount = 0;
   _edgeRetries = 0;
+  _failStreak = 0;
+  _failFrom = null;
+  _dayStepped = 0;
+  _suffixTried = false;
+  // Remember the naming that actually worked, so the next launch starts there
+  try { localStorage.setItem('zb_suffix', SUFFIXES[_suffixIdx]); } catch (e) {}
   S.loading = false; S.playing = true; updateUI();
   if (_resumeAt > 0) {
     var t = _resumeAt;
@@ -336,10 +371,64 @@ audio.addEventListener('ended', function() {
   // Auto-advance; if the next block isn't published yet, wait for it
   if (!skip(1)) armAutoAdvance();
 });
+// Give up on the current attempt: put the selection back where the user left
+// it, so a failure never silently moves them somewhere they didn't choose.
+function abandonPlayback(msg) {
+  _retryCount = 0;
+  _edgeRetries = 0;
+  _failStreak = 0;
+  _dayStepped = 0;
+  if (_failFrom !== null && (S.block !== _failFrom.block || S.day !== _failFrom.day)) {
+    S.day = _failFrom.day;
+    S.block = _failFrom.block;
+    renderDays();
+    renderTime();
+    updateNow();
+  }
+  _failFrom = null;
+  toast(msg);
+}
+
+// Whole day looks unavailable: fall back a day rather than forward a block.
+// An upstream gap is date-shaped, so stepping forward only finds more holes.
+function stepBackDay() {
+  if (S.day >= 6 || _dayStepped >= 2) return false;
+  S.day++;
+  _dayStepped++;
+  _retryCount = 0;
+  _edgeRetries = 0;
+  _failStreak = 0;
+  _suffixTried = false;
+  renderDays();
+  renderTime();
+  updateNow();
+  toast('No audio for ' + dayLabel(S.day - 1) + ' \u2014 trying ' + dayLabel(S.day));
+  play();
+  return true;
+}
+
 audio.addEventListener('error', function() {
   if (!audio.src) return;
   S.loading = false; S.playing = false;
   updateUI();
+  if (_failFrom === null) _failFrom = { day: S.day, block: S.block };
+  // code 4 = SRC_NOT_SUPPORTED: a non-audio body came back (404/error page)
+  var missing = audio.error && audio.error.code === 4;
+
+  if (missing && !_suffixTried) {
+    // The file naming may have flipped upstream — try the other suffix on the
+    // same block before assuming anything is actually wrong.
+    _suffixTried = true;
+    _suffixBase = _suffixIdx;
+    _suffixIdx = (_suffixIdx + 1) % SUFFIXES.length;
+    setTimeout(play, 300);
+    return;
+  }
+  // The alternative failed too, so this block is simply absent rather than
+  // renamed. Go back to the naming we trust — otherwise one missing block
+  // would poison every request that follows.
+  if (_suffixTried && _suffixIdx !== _suffixBase) _suffixIdx = _suffixBase;
+
   if (_retryCount === 0) {
     // First failure may be a transient network blip \u2014 retry the same block
     _retryCount++;
@@ -351,14 +440,17 @@ audio.addEventListener('error', function() {
     _edgeRetries++;
     toast('Waiting for broadcast\u2026');
     setTimeout(play, EDGE_RETRY_MS);
+  } else if (missing && _failStreak >= 1) {
+    // Two different blocks gone in a row is a gap in the archive, not a
+    // one-off bad file. Look for a day that still has audio.
+    if (!stepBackDay()) abandonPlayback('No recent audio \u2014 older days still work');
   } else if (!liveEdge() && _retryCount <= MAX_RETRIES) {
+    _failStreak++;
     _retryCount++;
     toast('Trying next block\u2026');
     setTimeout(function() { skip(1); }, 500);
   } else {
-    _retryCount = 0;
-    _edgeRetries = 0;
-    toast('Audio not available');
+    abandonPlayback('Audio not available');
   }
 });
 audio.addEventListener('timeupdate', function() {
@@ -615,6 +707,10 @@ $('nowSub').addEventListener('click', function() {
   if (lim < 0 || (S.day === 0 && S.block === lim)) return;
   _retryCount = 0;
   _edgeRetries = 0;
+  _failStreak = 0;
+  _failFrom = null;
+  _dayStepped = 0;
+  _suffixTried = false;
   _waitingNext = false;
   if (S.day !== 0) { S.day = 0; renderDays(); renderTime(); }
   S.block = lim;

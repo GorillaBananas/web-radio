@@ -3,7 +3,7 @@
 ## 1. URL Pattern
 
 ```
-https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/{region}/{YYYY.MM.DD}-{HH.MM.SS}-S.mp3
+https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/{region}/{YYYY.MM.DD}-{HH.MM.SS}-{D|S}.mp3
 ```
 
 ### Components
@@ -14,7 +14,7 @@ https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/{region}/{YYYY.MM.DD}-{HH.
 | Region | `auckland` / `wellington` / `christchurch` | Lowercase city name |
 | Date | `YYYY.MM.DD` | Dot-separated date (e.g. `2026.02.20`) |
 | Time | `HH.MM.SS` | Dot-separated 24-hour time (e.g. `07.15.00`) |
-| Suffix | `-S` | Streaming variant (supports HTTP range requests, returns 206 Partial Content). Note: an older `-D` "Download" suffix existed but was removed/disabled by the upstream around April 2026. |
+| Suffix | `-D` or `-S` | **Upstream flips this.** `-D` originally, `-S` from ~April 2026, back to `-D` at the 27 Sep 2026 cutover (see §4.1). Both return 206 Partial Content. Don't hard-code one — the app tries both and remembers what worked. |
 | Format | `.mp3` | MP3 audio |
 
 ### Time values (15-minute blocks)
@@ -77,6 +77,38 @@ a third-party origin tries to load the file directly. Workarounds:
 The "Week on Demand" branding indicates content is available for the **last 7 days**.
 Files older than 7 days are likely removed or return 404.
 
+A block appears roughly **2 minutes after it finishes airing** — confirmed in practice:
+the 8:15–8:30 block becomes fetchable around 8:32. `AVAIL_LAG_MIN` in `app.js` encodes this.
+
+### 4.1 The 27 September 2026 suffix cutover
+
+At the NZ daylight-saving changeover (2am Sun 27 Sep 2026) the upstream flipped the
+suffix from `-S` back to `-D`, without migrating existing files. Measured from a GitHub
+Actions runner that same week:
+
+| Date | `-D` | `-S` |
+|------|------|------|
+| 2026.09.25 | 404 | 206 |
+| 2026.09.26 | 404 | 206 |
+| 2026.09.27 | 206 | 404 |
+| 2026.09.28 | 206 | 404 |
+| 2026.09.29 | 206 | 404 |
+
+Everything else — host, path, region, date and time format — was unchanged.
+
+Lessons worth keeping:
+
+- **A 404 does not imply the URL format changed.** Here only the suffix moved, and only
+  for files written after the cutover. Probe old *and* recent dates before concluding.
+- **Check the boundary, not just one date.** A working old file next to a failing new one
+  is the signature of a cutover rather than an outage.
+- **The player's own bundle is the source of truth.** `weekOnDemandPlayerEngine.*.js`
+  contains the template — it built `${base}${region}/${date}-${time}.00-${suffix}.mp3`.
+  Loading their page in a headless browser and grepping the loaded scripts recovers the
+  current scheme in about a minute.
+- Geo-blocking is a tempting but wrong explanation: these files served fine from
+  Singapore and from US datacenter IPs throughout.
+
 ---
 
 ## 5. URL Construction Logic
@@ -84,7 +116,7 @@ Files older than 7 days are likely removed or return 404.
 To build a URL programmatically:
 
 ```javascript
-function buildWodUrl(region, date, hours, minutes) {
+function buildWodUrl(region, date, hours, minutes, suffix = 'D') {
   const dateStr = [
     date.getFullYear(),
     String(date.getMonth() + 1).padStart(2, '0'),
@@ -97,12 +129,17 @@ function buildWodUrl(region, date, hours, minutes) {
     '00'
   ].join('.');
 
-  return `https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/${region}/${dateStr}-${timeStr}-S.mp3`;
+  // suffix flips upstream — see §4.1; try 'D' then 'S' rather than hard-coding
+  return `https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/${region}/${dateStr}-${timeStr}-${suffix}.mp3`;
 }
 
 // Usage
-buildWodUrl('auckland', new Date(2026, 1, 20), 7, 15);
-// => https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.02.20-07.15.00-S.mp3
+buildWodUrl('auckland', new Date(2026, 8, 29), 7, 15);
+// => https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.09.29-07.15.00-D.mp3
+
+// Files written before the 27 Sep 2026 cutover still need 'S'
+buildWodUrl('auckland', new Date(2026, 8, 25), 7, 15, 'S');
+// => https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.09.25-07.15.00-S.mp3
 ```
 
 ---

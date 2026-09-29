@@ -1,0 +1,36 @@
+# TEMPORARY diagnostic workflow — delete once the new Week on Demand URL is known.
+# Runs a headless browser against NewstalkZB's own player and logs where it
+# fetches audio from. Needed because the dev container has no outbound access
+# to newstalkzb.co.nz.
+name: Probe ZB player
+
+on:
+  push:
+    branches: [claude/blissful-hopper-l2df22]
+    paths:
+      - 'scripts/probe-zb-player.js'
+      - '.github/workflows/probe-zb-player.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.56.1 --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Probe the player
+        run: node scripts/probe-zb-player.js

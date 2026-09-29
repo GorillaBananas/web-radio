@@ -150,7 +150,14 @@ echo "$HEADLINE"
   echo "headline=$HEADLINE"
 } >> "${GITHUB_OUTPUT:-/dev/null}"
 
+# Fail only when a listener would actually be stuck. A suffix split is worth
+# surfacing — it is what broke things in September — but app.js adapts to it on
+# its own, and it clears once pre-cutover files age out of the 7-day window.
+# Failing red for a handled, self-resolving condition just trains us to ignore
+# this check.
 case "$STATUS" in
-  ok|edge-lag|unreachable) exit 0 ;;
-  *) echo "::error::$HEADLINE"; exit 1 ;;
+  ok)                      exit 0 ;;
+  edge-lag|unreachable)    echo "::notice::$HEADLINE";  exit 0 ;;
+  suffix-split)            echo "::warning::$HEADLINE"; exit 0 ;;
+  *)                       echo "::error::$HEADLINE";   exit 1 ;;
 esac

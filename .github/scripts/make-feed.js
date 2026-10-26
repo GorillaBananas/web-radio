@@ -201,9 +201,11 @@ async function main() {
   const missing = sizes.filter(s => !s).length;
   if (missing) console.log(`  (${missing} without a Content-Length; emitted as 0)`);
 
+  const regionName = REGION.charAt(0).toUpperCase() + REGION.slice(1);
+
   const items = episodes.map(e => `    <item>
       <title>${xmlEscape(e.title)}</title>
-      <description>${xmlEscape(e.title + ' — Newstalk ZB ' + REGION)}</description>
+      <description>${xmlEscape(e.title + ' — Newstalk ZB ' + regionName)}</description>
       <enclosure url="${xmlEscape(e.url)}" type="audio/mpeg" length="${e.length}"/>
       <guid isPermaLink="false">${xmlEscape(e.guid)}</guid>
       <pubDate>${e.pub.toUTCString()}</pubDate>
@@ -211,20 +213,19 @@ async function main() {
       <itunes:explicit>false</itunes:explicit>
     </item>`).join('\n');
 
-  const region = REGION.charAt(0).toUpperCase() + REGION.slice(1);
   const feed = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"
      xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
      xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Newstalk ZB ${xmlEscape(region)} — Breakfast &amp; Drive</title>
+    <title>Newstalk ZB ${xmlEscape(regionName)} — Breakfast &amp; Drive</title>
     <link>${SITE}/</link>
     <atom:link href="${SITE}/feed.xml" rel="self" type="application/rss+xml"/>
-    <description>Newstalk ZB ${xmlEscape(region)} Week on Demand: the breakfast show from 6:45 am and drive from 4:45 pm, in 15-minute blocks, for the last ${DAYS} days. Unofficial personal feed; audio served by NewstalkZB.</description>
+    <description>Newstalk ZB ${xmlEscape(regionName)} Week on Demand: the breakfast show from 6:45 am and drive from 4:45 pm, in 15-minute blocks, for the last ${DAYS} days. Unofficial personal feed; audio served by NewstalkZB.</description>
     <language>en-nz</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <itunes:author>Newstalk ZB</itunes:author>
-    <itunes:summary>Newstalk ZB ${xmlEscape(region)} breakfast and drive, in 15-minute blocks, for the last ${DAYS} days.</itunes:summary>
+    <itunes:summary>Newstalk ZB ${xmlEscape(regionName)} breakfast and drive, in 15-minute blocks, for the last ${DAYS} days.</itunes:summary>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="News"><itunes:category text="News Commentary"/></itunes:category>
     <itunes:image href="${SITE}/artwork.png"/>

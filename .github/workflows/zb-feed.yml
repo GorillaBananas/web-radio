@@ -66,8 +66,11 @@ jobs:
           # (Deliberately a hash compare rather than a grep pipeline: `grep -q`
           # short-circuits and SIGPIPEs its upstream, which under `pipefail`
           # reads as failure and silently inverts the test.)
+          # The runner invokes bash with -e, and on the very first run feed.xml
+          # is not in HEAD yet, so this lookup is *expected* to fail — guard it
+          # or -e kills the step before it can decide anything.
           NEW=$(grep -v 'lastBuildDate' feed.xml | sha256sum | cut -d' ' -f1)
-          OLD=$(git show HEAD:feed.xml 2>/dev/null | grep -v 'lastBuildDate' | sha256sum | cut -d' ' -f1)
+          OLD=$(git show HEAD:feed.xml 2>/dev/null | grep -v 'lastBuildDate' | sha256sum | cut -d' ' -f1) || OLD=''
           echo "old=${OLD:0:12} new=${NEW:0:12}"
 
           if [ "$NEW" = "$OLD" ]; then

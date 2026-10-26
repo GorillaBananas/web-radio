@@ -1,0 +1,75 @@
+# Publish a podcast feed of the breakfast and drive blocks, so the shows can be
+# followed in Apple Podcasts and streamed on a cellular Apple Watch with no
+# iPhone nearby. watchOS has no browser, so the PWA can never run there.
+name: ZB feed
+
+on:
+  schedule:
+    # Timed around when each show *finishes*, since this is catch-up listening.
+    # Cron is UTC and NZ shifts an hour at DST, so each slot is set late enough
+    # to land after the show in both NZDT (UTC+13) and NZST (UTC+12).
+    - cron: '15 21 * * *'   # 10:15 NZDT / 09:15 NZST — breakfast complete
+    - cron: '0 1 * * *'     # 14:00 NZDT / 13:00 NZST — midday top-up
+    - cron: '15 7 * * *'    # 20:15 NZDT / 19:15 NZST — drive complete
+    - cron: '0 10 * * *'    # 23:00 NZDT / 22:00 NZST — end of day
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: zb-feed
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # The PWA needs a service worker to dodge the hotlink block, because
+      # browsers send Sec-Fetch-Dest: audio. Native podcast clients do not send
+      # that header at all, which is the whole reason this approach works — so
+      # prove it rather than assume it.
+      - name: Check a native client is not blocked
+        run: |
+          set -uo pipefail
+          DATE=$(TZ='Pacific/Auckland' date -d yesterday +%Y.%m.%d)
+          URL="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/${DATE}-07.00.00-D.mp3"
+          FAIL=0
+          probe() {
+            OUT=$(curl -sS -o /dev/null -D - -r 0-1023 --max-time 30 -A "$2" "$URL" 2>/dev/null \
+                  | tr -d '\r' | awk 'BEGIN{IGNORECASE=1} /^HTTP\//{c=$2} /^content-type:/{t=$2} END{print c" "t}')
+            echo "  $1 -> $OUT"
+            case "$OUT" in
+              20[06]*audio/*) ;;
+              *) echo "  ^ unexpected"; FAIL=1 ;;
+            esac
+          }
+          probe "plain curl        " "curl/8.0"
+          probe "Apple Podcasts UA " "AppleCoreMedia/1.0.0.21G80 (iPhone; U; CPU OS 17_6 like Mac OS X)"
+          probe "Watch UA          " "AppleCoreMedia/1.0.0.21T576 (Apple Watch; U; CPU OS 10_6 like Mac OS X)"
+          if [ "$FAIL" != 0 ]; then
+            echo "::error::A native-client request was refused or served non-audio — the podcast feed approach will not work."
+            exit 1
+          fi
+
+      - name: Generate the feed
+        run: node .github/scripts/make-feed.js feed.xml
+
+      - name: Commit if it changed
+        run: |
+          set -euo pipefail
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add feed.xml
+          # lastBuildDate alone changes every run; only commit when the episode
+          # list actually differs, to keep the history readable.
+          if git diff --staged -U0 -- feed.xml | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' | grep -qv 'lastBuildDate'; then
+            git commit -m "chore: refresh ZB podcast feed"
+            git push
+          else
+            echo 'only lastBuildDate changed — nothing to commit'
+            git restore --staged feed.xml && git checkout -- feed.xml
+          fi

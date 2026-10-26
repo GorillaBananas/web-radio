@@ -155,3 +155,36 @@ For comparison, NZME live streams use a completely separate infrastructure (Stre
 | ZB Auckland (overseas) | `http://streaming.radiomyway.co.nz/zbakalt.pls` |
 | ZB Wellington (overseas) | `http://streaming.radiomyway.co.nz/zbwnalt.pls` |
 | ZB Christchurch (overseas) | `http://streaming.radiomyway.co.nz/zbchalt.pls` |
+
+---
+
+## 7. Podcast feed (Apple Watch and anything else)
+
+`https://gorillabananas.github.io/web-radio/feed.xml`
+
+An RSS podcast feed of the breakfast (6:45–9:00 am) and drive (4:45–7:00 pm)
+blocks for the last 3 days, regenerated four times a day by
+`.github/workflows/zb-feed.yml` from `.github/scripts/make-feed.js`.
+
+**Why it exists.** watchOS has no browser and no Service Worker support, so the
+PWA can never run on an Apple Watch. A podcast feed sidesteps that entirely:
+Apple Podcasts follows an arbitrary feed (Library → ⋯ → *Follow a Show by URL*),
+and a cellular Apple Watch streams Apple Podcasts with no iPhone nearby. It also
+means the shows work on iPhone, CarPlay and HomePod for free.
+
+**Why it needs no service-worker trick.** §3's hotlink protection keys on
+`Sec-Fetch-Dest: audio`, which only browsers send. Native podcast clients send no
+`Sec-Fetch-*` headers at all, so they get the file directly. The feed workflow
+proves this on every run by probing with Apple Podcasts and Apple Watch user
+agents and failing if either is refused — don't remove that step.
+
+**Suffix handling.** A static feed cannot retry the way `app.js` does, so the
+generator probes both suffixes at build time and writes whichever the server is
+actually serving (see §4.1 for why this moves). If neither works it exits
+non-zero and leaves the previous `feed.xml` in place rather than publishing dead
+links. Episode GUIDs deliberately exclude the suffix, so a flip doesn't make
+every client re-download everything.
+
+**Editing what's in it.** The constants at the top of `make-feed.js` —
+`REGION`, `DAYS`, `SEGMENTS` — are the whole configuration. Blocks are indexed as
+in `app.js`: block 27 is 6:45 am, block 67 is 4:45 pm.

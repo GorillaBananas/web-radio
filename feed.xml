@@ -8,7 +8,7 @@
     <atom:link href="https://gorillabananas.github.io/web-radio/feed.xml" rel="self" type="application/rss+xml"/>
     <description>Newstalk ZB Auckland Week on Demand: the breakfast show from 6:45 am and drive from 4:45 pm, in 15-minute blocks, for the last 3 days. Unofficial personal feed; audio served by NewstalkZB.</description>
     <language>en-nz</language>
-    <lastBuildDate>Mon, 26 Oct 2026 22:17:55 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 26 Oct 2026 22:20:01 GMT</lastBuildDate>
     <itunes:author>Newstalk ZB</itunes:author>
     <itunes:summary>Newstalk ZB Auckland breakfast and drive, in 15-minute blocks, for the last 3 days.</itunes:summary>
     <itunes:explicit>false</itunes:explicit>
@@ -17,7 +17,7 @@
     <itunes:owner><itunes:name>Newstalk ZB</itunes:name></itunes:owner>
     <item>
       <title>Breakfast 8:45 am · Tue 27 Oct</title>
-      <description>Breakfast 8:45 am · Tue 27 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 8:45 am · Tue 27 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.27-08.45.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.27-08.45.00</guid>
       <pubDate>Mon, 26 Oct 2026 19:45:00 GMT</pubDate>
@@ -26,7 +26,7 @@
     </item>
     <item>
       <title>Breakfast 8:30 am · Tue 27 Oct</title>
-      <description>Breakfast 8:30 am · Tue 27 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 8:30 am · Tue 27 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.27-08.30.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.27-08.30.00</guid>
       <pubDate>Mon, 26 Oct 2026 19:30:00 GMT</pubDate>
@@ -35,7 +35,7 @@
     </item>
     <item>
       <title>Breakfast 8:15 am · Tue 27 Oct</title>
-      <description>Breakfast 8:15 am · Tue 27 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 8:15 am · Tue 27 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.27-08.15.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.27-08.15.00</guid>
       <pubDate>Mon, 26 Oct 2026 19:15:00 GMT</pubDate>
@@ -44,7 +44,7 @@
     </item>
     <item>
       <title>Breakfast 8:00 am · Tue 27 Oct</title>
-      <description>Breakfast 8:00 am · Tue 27 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 8:00 am · Tue 27 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.27-08.00.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.27-08.00.00</guid>
       <pubDate>Mon, 26 Oct 2026 19:00:00 GMT</pubDate>
@@ -53,7 +53,7 @@
     </item>
     <item>
       <title>Breakfast 7:45 am · Tue 27 Oct</title>
-      <description>Breakfast 7:45 am · Tue 27 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 7:45 am · Tue 27 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.27-07.45.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.27-07.45.00</guid>
       <pubDate>Mon, 26 Oct 2026 18:45:00 GMT</pubDate>
@@ -62,7 +62,7 @@
     </item>
     <item>
       <title>Breakfast 7:30 am · Tue 27 Oct</title>
-      <description>Breakfast 7:30 am · Tue 27 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 7:30 am · Tue 27 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.27-07.30.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.27-07.30.00</guid>
       <pubDate>Mon, 26 Oct 2026 18:30:00 GMT</pubDate>
@@ -71,7 +71,7 @@
     </item>
     <item>
       <title>Breakfast 7:15 am · Tue 27 Oct</title>
-      <description>Breakfast 7:15 am · Tue 27 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 7:15 am · Tue 27 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.27-07.15.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.27-07.15.00</guid>
       <pubDate>Mon, 26 Oct 2026 18:15:00 GMT</pubDate>
@@ -80,7 +80,7 @@
     </item>
     <item>
       <title>Breakfast 7:00 am · Tue 27 Oct</title>
-      <description>Breakfast 7:00 am · Tue 27 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 7:00 am · Tue 27 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.27-07.00.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.27-07.00.00</guid>
       <pubDate>Mon, 26 Oct 2026 18:00:00 GMT</pubDate>
@@ -89,7 +89,7 @@
     </item>
     <item>
       <title>Breakfast 6:45 am · Tue 27 Oct</title>
-      <description>Breakfast 6:45 am · Tue 27 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 6:45 am · Tue 27 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.27-06.45.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.27-06.45.00</guid>
       <pubDate>Mon, 26 Oct 2026 17:45:00 GMT</pubDate>
@@ -98,7 +98,7 @@
     </item>
     <item>
       <title>Drive 6:45 pm · Mon 26 Oct</title>
-      <description>Drive 6:45 pm · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Drive 6:45 pm · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-18.45.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-18.45.00</guid>
       <pubDate>Mon, 26 Oct 2026 05:45:00 GMT</pubDate>
@@ -107,7 +107,7 @@
     </item>
     <item>
       <title>Drive 6:30 pm · Mon 26 Oct</title>
-      <description>Drive 6:30 pm · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Drive 6:30 pm · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-18.30.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-18.30.00</guid>
       <pubDate>Mon, 26 Oct 2026 05:30:00 GMT</pubDate>
@@ -116,7 +116,7 @@
     </item>
     <item>
       <title>Drive 6:15 pm · Mon 26 Oct</title>
-      <description>Drive 6:15 pm · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Drive 6:15 pm · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-18.15.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-18.15.00</guid>
       <pubDate>Mon, 26 Oct 2026 05:15:00 GMT</pubDate>
@@ -125,7 +125,7 @@
     </item>
     <item>
       <title>Drive 6:00 pm · Mon 26 Oct</title>
-      <description>Drive 6:00 pm · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Drive 6:00 pm · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-18.00.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-18.00.00</guid>
       <pubDate>Mon, 26 Oct 2026 05:00:00 GMT</pubDate>
@@ -134,7 +134,7 @@
     </item>
     <item>
       <title>Drive 5:45 pm · Mon 26 Oct</title>
-      <description>Drive 5:45 pm · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Drive 5:45 pm · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-17.45.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-17.45.00</guid>
       <pubDate>Mon, 26 Oct 2026 04:45:00 GMT</pubDate>
@@ -143,7 +143,7 @@
     </item>
     <item>
       <title>Drive 5:30 pm · Mon 26 Oct</title>
-      <description>Drive 5:30 pm · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Drive 5:30 pm · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-17.30.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-17.30.00</guid>
       <pubDate>Mon, 26 Oct 2026 04:30:00 GMT</pubDate>
@@ -152,7 +152,7 @@
     </item>
     <item>
       <title>Drive 5:15 pm · Mon 26 Oct</title>
-      <description>Drive 5:15 pm · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Drive 5:15 pm · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-17.15.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-17.15.00</guid>
       <pubDate>Mon, 26 Oct 2026 04:15:00 GMT</pubDate>
@@ -161,7 +161,7 @@
     </item>
     <item>
       <title>Drive 5:00 pm · Mon 26 Oct</title>
-      <description>Drive 5:00 pm · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Drive 5:00 pm · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-17.00.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-17.00.00</guid>
       <pubDate>Mon, 26 Oct 2026 04:00:00 GMT</pubDate>
@@ -170,7 +170,7 @@
     </item>
     <item>
       <title>Drive 4:45 pm · Mon 26 Oct</title>
-      <description>Drive 4:45 pm · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Drive 4:45 pm · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-16.45.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-16.45.00</guid>
       <pubDate>Mon, 26 Oct 2026 03:45:00 GMT</pubDate>
@@ -179,7 +179,7 @@
     </item>
     <item>
       <title>Breakfast 8:45 am · Mon 26 Oct</title>
-      <description>Breakfast 8:45 am · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 8:45 am · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-08.45.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-08.45.00</guid>
       <pubDate>Sun, 25 Oct 2026 19:45:00 GMT</pubDate>
@@ -188,7 +188,7 @@
     </item>
     <item>
       <title>Breakfast 8:30 am · Mon 26 Oct</title>
-      <description>Breakfast 8:30 am · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 8:30 am · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-08.30.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-08.30.00</guid>
       <pubDate>Sun, 25 Oct 2026 19:30:00 GMT</pubDate>
@@ -197,7 +197,7 @@
     </item>
     <item>
       <title>Breakfast 8:15 am · Mon 26 Oct</title>
-      <description>Breakfast 8:15 am · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 8:15 am · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-08.15.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-08.15.00</guid>
       <pubDate>Sun, 25 Oct 2026 19:15:00 GMT</pubDate>
@@ -206,7 +206,7 @@
     </item>
     <item>
       <title>Breakfast 8:00 am · Mon 26 Oct</title>
-      <description>Breakfast 8:00 am · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 8:00 am · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-08.00.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-08.00.00</guid>
       <pubDate>Sun, 25 Oct 2026 19:00:00 GMT</pubDate>
@@ -215,7 +215,7 @@
     </item>
     <item>
       <title>Breakfast 7:45 am · Mon 26 Oct</title>
-      <description>Breakfast 7:45 am · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 7:45 am · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-07.45.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-07.45.00</guid>
       <pubDate>Sun, 25 Oct 2026 18:45:00 GMT</pubDate>
@@ -224,7 +224,7 @@
     </item>
     <item>
       <title>Breakfast 7:30 am · Mon 26 Oct</title>
-      <description>Breakfast 7:30 am · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 7:30 am · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-07.30.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-07.30.00</guid>
       <pubDate>Sun, 25 Oct 2026 18:30:00 GMT</pubDate>
@@ -233,7 +233,7 @@
     </item>
     <item>
       <title>Breakfast 7:15 am · Mon 26 Oct</title>
-      <description>Breakfast 7:15 am · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 7:15 am · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-07.15.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-07.15.00</guid>
       <pubDate>Sun, 25 Oct 2026 18:15:00 GMT</pubDate>
@@ -242,7 +242,7 @@
     </item>
     <item>
       <title>Breakfast 7:00 am · Mon 26 Oct</title>
-      <description>Breakfast 7:00 am · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 7:00 am · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-07.00.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-07.00.00</guid>
       <pubDate>Sun, 25 Oct 2026 18:00:00 GMT</pubDate>
@@ -251,7 +251,7 @@
     </item>
     <item>
       <title>Breakfast 6:45 am · Mon 26 Oct</title>
-      <description>Breakfast 6:45 am · Mon 26 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 6:45 am · Mon 26 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.26-06.45.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.26-06.45.00</guid>
       <pubDate>Sun, 25 Oct 2026 17:45:00 GMT</pubDate>
@@ -260,7 +260,7 @@
     </item>
     <item>
       <title>Drive 6:45 pm · Sun 25 Oct</title>
-      <description>Drive 6:45 pm · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Drive 6:45 pm · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-18.45.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-18.45.00</guid>
       <pubDate>Sun, 25 Oct 2026 05:45:00 GMT</pubDate>
@@ -269,7 +269,7 @@
     </item>
     <item>
       <title>Drive 6:30 pm · Sun 25 Oct</title>
-      <description>Drive 6:30 pm · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Drive 6:30 pm · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-18.30.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-18.30.00</guid>
       <pubDate>Sun, 25 Oct 2026 05:30:00 GMT</pubDate>
@@ -278,7 +278,7 @@
     </item>
     <item>
       <title>Drive 6:15 pm · Sun 25 Oct</title>
-      <description>Drive 6:15 pm · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Drive 6:15 pm · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-18.15.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-18.15.00</guid>
       <pubDate>Sun, 25 Oct 2026 05:15:00 GMT</pubDate>
@@ -287,7 +287,7 @@
     </item>
     <item>
       <title>Drive 6:00 pm · Sun 25 Oct</title>
-      <description>Drive 6:00 pm · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Drive 6:00 pm · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-18.00.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-18.00.00</guid>
       <pubDate>Sun, 25 Oct 2026 05:00:00 GMT</pubDate>
@@ -296,7 +296,7 @@
     </item>
     <item>
       <title>Drive 5:45 pm · Sun 25 Oct</title>
-      <description>Drive 5:45 pm · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Drive 5:45 pm · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-17.45.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-17.45.00</guid>
       <pubDate>Sun, 25 Oct 2026 04:45:00 GMT</pubDate>
@@ -305,7 +305,7 @@
     </item>
     <item>
       <title>Drive 5:30 pm · Sun 25 Oct</title>
-      <description>Drive 5:30 pm · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Drive 5:30 pm · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-17.30.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-17.30.00</guid>
       <pubDate>Sun, 25 Oct 2026 04:30:00 GMT</pubDate>
@@ -314,7 +314,7 @@
     </item>
     <item>
       <title>Drive 5:15 pm · Sun 25 Oct</title>
-      <description>Drive 5:15 pm · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Drive 5:15 pm · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-17.15.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-17.15.00</guid>
       <pubDate>Sun, 25 Oct 2026 04:15:00 GMT</pubDate>
@@ -323,7 +323,7 @@
     </item>
     <item>
       <title>Drive 5:00 pm · Sun 25 Oct</title>
-      <description>Drive 5:00 pm · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Drive 5:00 pm · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-17.00.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-17.00.00</guid>
       <pubDate>Sun, 25 Oct 2026 04:00:00 GMT</pubDate>
@@ -332,7 +332,7 @@
     </item>
     <item>
       <title>Drive 4:45 pm · Sun 25 Oct</title>
-      <description>Drive 4:45 pm · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Drive 4:45 pm · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-16.45.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-16.45.00</guid>
       <pubDate>Sun, 25 Oct 2026 03:45:00 GMT</pubDate>
@@ -341,7 +341,7 @@
     </item>
     <item>
       <title>Breakfast 8:45 am · Sun 25 Oct</title>
-      <description>Breakfast 8:45 am · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 8:45 am · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-08.45.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-08.45.00</guid>
       <pubDate>Sat, 24 Oct 2026 19:45:00 GMT</pubDate>
@@ -350,7 +350,7 @@
     </item>
     <item>
       <title>Breakfast 8:30 am · Sun 25 Oct</title>
-      <description>Breakfast 8:30 am · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 8:30 am · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-08.30.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-08.30.00</guid>
       <pubDate>Sat, 24 Oct 2026 19:30:00 GMT</pubDate>
@@ -359,7 +359,7 @@
     </item>
     <item>
       <title>Breakfast 8:15 am · Sun 25 Oct</title>
-      <description>Breakfast 8:15 am · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 8:15 am · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-08.15.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-08.15.00</guid>
       <pubDate>Sat, 24 Oct 2026 19:15:00 GMT</pubDate>
@@ -368,7 +368,7 @@
     </item>
     <item>
       <title>Breakfast 8:00 am · Sun 25 Oct</title>
-      <description>Breakfast 8:00 am · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 8:00 am · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-08.00.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-08.00.00</guid>
       <pubDate>Sat, 24 Oct 2026 19:00:00 GMT</pubDate>
@@ -377,7 +377,7 @@
     </item>
     <item>
       <title>Breakfast 7:45 am · Sun 25 Oct</title>
-      <description>Breakfast 7:45 am · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 7:45 am · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-07.45.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-07.45.00</guid>
       <pubDate>Sat, 24 Oct 2026 18:45:00 GMT</pubDate>
@@ -386,7 +386,7 @@
     </item>
     <item>
       <title>Breakfast 7:30 am · Sun 25 Oct</title>
-      <description>Breakfast 7:30 am · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 7:30 am · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-07.30.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-07.30.00</guid>
       <pubDate>Sat, 24 Oct 2026 18:30:00 GMT</pubDate>
@@ -395,7 +395,7 @@
     </item>
     <item>
       <title>Breakfast 7:15 am · Sun 25 Oct</title>
-      <description>Breakfast 7:15 am · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 7:15 am · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-07.15.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-07.15.00</guid>
       <pubDate>Sat, 24 Oct 2026 18:15:00 GMT</pubDate>
@@ -404,7 +404,7 @@
     </item>
     <item>
       <title>Breakfast 7:00 am · Sun 25 Oct</title>
-      <description>Breakfast 7:00 am · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 7:00 am · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-07.00.00-D.mp3" type="audio/mpeg" length="10784837"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-07.00.00</guid>
       <pubDate>Sat, 24 Oct 2026 18:00:00 GMT</pubDate>
@@ -413,7 +413,7 @@
     </item>
     <item>
       <title>Breakfast 6:45 am · Sun 25 Oct</title>
-      <description>Breakfast 6:45 am · Sun 25 Oct — Newstalk ZB auckland</description>
+      <description>Breakfast 6:45 am · Sun 25 Oct — Newstalk ZB Auckland</description>
       <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.25-06.45.00-D.mp3" type="audio/mpeg" length="10782333"/>
       <guid isPermaLink="false">zb-auckland-2026.10.25-06.45.00</guid>
       <pubDate>Sat, 24 Oct 2026 17:45:00 GMT</pubDate>

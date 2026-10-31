@@ -8,13 +8,94 @@
     <atom:link href="https://gorillabananas.github.io/web-radio/feed.xml" rel="self" type="application/rss+xml"/>
     <description>Newstalk ZB Auckland Week on Demand: the breakfast show from 6:45 am and drive from 4:45 pm, in 15-minute blocks, for the last 3 days. Unofficial personal feed; audio served by NewstalkZB.</description>
     <language>en-nz</language>
-    <lastBuildDate>Sat, 31 Oct 2026 00:44:58 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 31 Oct 2026 06:51:01 GMT</lastBuildDate>
     <itunes:author>Newstalk ZB</itunes:author>
     <itunes:summary>Newstalk ZB Auckland breakfast and drive, in 15-minute blocks, for the last 3 days.</itunes:summary>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="News"><itunes:category text="News Commentary"/></itunes:category>
     <itunes:image href="https://gorillabananas.github.io/web-radio/artwork.png"/>
     <itunes:owner><itunes:name>Newstalk ZB</itunes:name></itunes:owner>
+    <item>
+      <title>Drive 6:45 pm · Sat 31 Oct</title>
+      <description>Drive 6:45 pm · Sat 31 Oct — Newstalk ZB Auckland</description>
+      <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.31-18.45.00-D.mp3" type="audio/mpeg" length="10784837"/>
+      <guid isPermaLink="false">zb-auckland-2026.10.31-18.45.00</guid>
+      <pubDate>Sat, 31 Oct 2026 05:45:00 GMT</pubDate>
+      <itunes:duration>900</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>Drive 6:30 pm · Sat 31 Oct</title>
+      <description>Drive 6:30 pm · Sat 31 Oct — Newstalk ZB Auckland</description>
+      <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.31-18.30.00-D.mp3" type="audio/mpeg" length="10782333"/>
+      <guid isPermaLink="false">zb-auckland-2026.10.31-18.30.00</guid>
+      <pubDate>Sat, 31 Oct 2026 05:30:00 GMT</pubDate>
+      <itunes:duration>900</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>Drive 6:15 pm · Sat 31 Oct</title>
+      <description>Drive 6:15 pm · Sat 31 Oct — Newstalk ZB Auckland</description>
+      <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.31-18.15.00-D.mp3" type="audio/mpeg" length="10784837"/>
+      <guid isPermaLink="false">zb-auckland-2026.10.31-18.15.00</guid>
+      <pubDate>Sat, 31 Oct 2026 05:15:00 GMT</pubDate>
+      <itunes:duration>900</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>Drive 6:00 pm · Sat 31 Oct</title>
+      <description>Drive 6:00 pm · Sat 31 Oct — Newstalk ZB Auckland</description>
+      <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.31-18.00.00-D.mp3" type="audio/mpeg" length="10784837"/>
+      <guid isPermaLink="false">zb-auckland-2026.10.31-18.00.00</guid>
+      <pubDate>Sat, 31 Oct 2026 05:00:00 GMT</pubDate>
+      <itunes:duration>900</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>Drive 5:45 pm · Sat 31 Oct</title>
+      <description>Drive 5:45 pm · Sat 31 Oct — Newstalk ZB Auckland</description>
+      <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.31-17.45.00-D.mp3" type="audio/mpeg" length="10782333"/>
+      <guid isPermaLink="false">zb-auckland-2026.10.31-17.45.00</guid>
+      <pubDate>Sat, 31 Oct 2026 04:45:00 GMT</pubDate>
+      <itunes:duration>900</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>Drive 5:30 pm · Sat 31 Oct</title>
+      <description>Drive 5:30 pm · Sat 31 Oct — Newstalk ZB Auckland</description>
+      <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.31-17.30.00-D.mp3" type="audio/mpeg" length="10784837"/>
+      <guid isPermaLink="false">zb-auckland-2026.10.31-17.30.00</guid>
+      <pubDate>Sat, 31 Oct 2026 04:30:00 GMT</pubDate>
+      <itunes:duration>900</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>Drive 5:15 pm · Sat 31 Oct</title>
+      <description>Drive 5:15 pm · Sat 31 Oct — Newstalk ZB Auckland</description>
+      <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.31-17.15.00-D.mp3" type="audio/mpeg" length="10784837"/>
+      <guid isPermaLink="false">zb-auckland-2026.10.31-17.15.00</guid>
+      <pubDate>Sat, 31 Oct 2026 04:15:00 GMT</pubDate>
+      <itunes:duration>900</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>Drive 5:00 pm · Sat 31 Oct</title>
+      <description>Drive 5:00 pm · Sat 31 Oct — Newstalk ZB Auckland</description>
+      <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.31-17.00.00-D.mp3" type="audio/mpeg" length="10782333"/>
+      <guid isPermaLink="false">zb-auckland-2026.10.31-17.00.00</guid>
+      <pubDate>Sat, 31 Oct 2026 04:00:00 GMT</pubDate>
+      <itunes:duration>900</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>Drive 4:45 pm · Sat 31 Oct</title>
+      <description>Drive 4:45 pm · Sat 31 Oct — Newstalk ZB Auckland</description>
+      <enclosure url="https://weekondemand.newstalkzb.co.nz/WeekOnDemand/ZB/auckland/2026.10.31-16.45.00-D.mp3" type="audio/mpeg" length="10784837"/>
+      <guid isPermaLink="false">zb-auckland-2026.10.31-16.45.00</guid>
+      <pubDate>Sat, 31 Oct 2026 03:45:00 GMT</pubDate>
+      <itunes:duration>900</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
     <item>
       <title>Breakfast 8:45 am · Sat 31 Oct</title>
       <description>Breakfast 8:45 am · Sat 31 Oct — Newstalk ZB Auckland</description>
